@@ -1,0 +1,14 @@
+###from django.db import models
+##from core.http.models import AbstractBaseModel
+##from django.utils.translation import gettext_lazy as _
+##
+
+class {class_name}(AbstractBaseModel):
+    name = ...
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("{class_name}")
+        verbose_name_plural = _("{class_name}")

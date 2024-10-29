@@ -1,0 +1,7 @@
+##from django.test import TestCase
+##
+
+class {class_name}(TestCase):
+    def setUp(self):
+        ...
+    

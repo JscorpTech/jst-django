@@ -1,0 +1,5 @@
+##from modeltranslation.translator import TranslationOptions
+##
+
+class {class_name}(TranslationOptions):
+    fields = ()

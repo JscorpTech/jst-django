@@ -1,0 +1,9 @@
+venv/
+dist/
+jst_django.egg-info/
+git.diff
+poetry.lock
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+**/__pycache__/

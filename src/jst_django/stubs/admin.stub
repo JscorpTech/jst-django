@@ -1,0 +1,5 @@
+##from unfold.admin import ModelAdmin
+##
+
+class {class_name}(ModelAdmin):
+    ...

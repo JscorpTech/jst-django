@@ -1,0 +1,8 @@
+##from django import forms
+##
+
+class {class_name}(forms.ModelForm):
+
+    class Meta:
+        #model = CustomerModel
+        fields = "__all__"
