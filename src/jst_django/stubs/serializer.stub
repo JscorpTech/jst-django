@@ -1,5 +1,7 @@
 ##from rest_framework import serializers
 ##
 
-class {class_name}(serializers.Serializer):
-    ...
+class {class_name}(serializers.ModelSerializer):
+    class Meta:
+        #model = model
+        fields = []
