@@ -18,7 +18,7 @@ class Generate:
             "permission": "permissions/",
             "admin": "admin/",
             "test": "tests/",
-            "translation": "translations/",
+            "translation": "translation/",
             "validator": "validators/",
             "form": "forms/",
             "filter": "filters/",
