@@ -1,13 +1,13 @@
 import requests
 
 
-class Gitlab:
+class Github:
 
     def __init__(self) -> None:
-        self.project_id = "56597109"
+        self.project_id = "JscorpTech"
 
     def request(self, action):
-        url = "https://gitlab.com/api/v4/projects/{}/repository/{}".format(
+        url = "https://api.github.com/repos/{}/django/{}".format(
             self.project_id, action
         )
         response = requests.get(url)
@@ -19,7 +19,7 @@ class Gitlab:
         response = []
         branches = list(map(lambda branch: branch["name"], self.request("branches")))
         for branch in branches:
-            if str(branch).startswith("V"):
+            if str(branch).startswith("V") or branch == "main" or branch == "dev":
                 response.append(branch)
         response.reverse()
         return response

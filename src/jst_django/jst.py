@@ -9,7 +9,7 @@ from cookiecutter.main import cookiecutter
 import questionary
 from typing import Annotated
 from .generate import Generate
-from .api import Gitlab
+from .api import Github
 
 
 app = typer.Typer()
@@ -57,7 +57,7 @@ def download_and_extract_module(module_name, url):
 
 def get_modules():
     response = requests.get(
-        "https://gitlab.com/JscorpTech/django-modules/-/raw/main/modules.json"
+        "https://raw.githubusercontent.com/JscorpTech/django-modules/refs/heads/main/modules.json"
     )
     response.raise_for_status()
     return response.json()
@@ -71,10 +71,8 @@ def install_module(
     if module_name is None:
         module_name = module
     if module.startswith("http") is not True:
-        module = (
-            "https://gitlab.com/JscorpTech/django-modules/-/raw/main/{}.zip".format(
-                module
-            )
+        module = "https://raw.githubusercontent.com/JscorpTech/django-modules/refs/heads/main/{}.zip".format(
+            module
         )
 
     with progress.Progress(
@@ -100,9 +98,9 @@ def install_module(
 def create_project():
     template = questionary.text("Template: ", default="django").ask()
     if template.startswith("http") is not True:
-        template = "http://gitlab.com/JscorpTech/{}".format(template)
+        template = "http://github.com/JscorpTech/{}".format(template)
     branch = questionary.select(
-        "Qaysi versiyadan foydalanmoqchisiz: ", Gitlab().branches()
+        "Qaysi versiyadan foydalanmoqchisiz: ", Github().branches()
     ).ask()
     cookiecutter(template, checkout=branch)
 
