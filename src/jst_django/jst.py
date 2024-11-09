@@ -10,6 +10,7 @@ import questionary
 from typing import Annotated
 from .generate import Generate
 from .api import Github
+from .translate import Translate
 
 
 app = typer.Typer()
@@ -109,6 +110,9 @@ def create_project():
 def generate():
     Generate().run()
 
+@app.command(name="translate", help="Avtomatik tarjima")
+def translate():
+    Translate().run()
 
 if __name__ == "__main__":
     app()
