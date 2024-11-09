@@ -3,6 +3,7 @@ import questionary.question
 import os
 import questionary
 import black
+from . import models
 
 
 class Generate:
@@ -10,6 +11,13 @@ class Generate:
     file_name: Optional[str] = None
 
     def __init__(self) -> None:
+        self.fields = [
+            models.CharField,
+            models.IntegerField,
+            models.ForeignKey,
+            models.ManyToManyField,
+            models.TextField
+        ]
         self.path = {
             "apps": "./core/apps/",
             "model": "models/",
@@ -122,6 +130,23 @@ class Generate:
             self.format_code(file_path)
         return True
 
+    def get_fields(self):
+        while True:
+            if not questionary.confirm("Do you want to add a new field?", default=False).ask():
+                break
+            field_name = questionary.text("Enter field name: ", validate=lambda x: len(x) > 0).ask()
+            field_type = questionary.select("Select Field: ", [str(i.__name__) for i in self.fields]).ask()
+            field_items = getattr(models, field_type).__fields__
+            res = {}
+            for name, info in field_items.items():
+                default = str(info.default)
+                is_required  = True
+                if default == "PydanticUndefined":
+                    is_required  = True
+                    default = ""
+                res[name] = questionary.text(f"Select property: {name}", default=str(default), validate=lambda x: True if len(x) > 0 and is_required else False).ask()
+            raise Exception(res)
+
     def run(self) -> None:
         """Ishga tushurish uchun"""
         self.file_name = questionary.text("File Name: ").ask()
@@ -130,3 +155,4 @@ class Generate:
         app = questionary.select("Appni tanlang", choices=self.get_apps()).ask()
         modules = questionary.checkbox("Kerakli modullarni tanlang", self.modules).ask()
         self.make_folders(app, modules)
+
