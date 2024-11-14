@@ -1,5 +1,6 @@
 import zipfile
 import tempfile
+import jst_aicommit.main
 import questionary.question
 import requests
 import os
@@ -11,7 +12,7 @@ from typing import Annotated
 from .generate import Generate
 from .api import Github
 from .translate import Translate
-
+from jst_aicommit.main import JstAiCommit
 
 app = typer.Typer()
 
@@ -109,6 +110,11 @@ def create_project():
 @app.command(name="generate", help="Compoment generatsiya qilish")
 def generate():
     Generate().run()
+
+@app.command(name="aic", help="O'zgarishlarga qarab atomatik git commit yaratadi")
+def aic():
+    JstAiCommit().run()
+
 
 @app.command(name="translate", help="Avtomatik tarjima")
 def translate():
