@@ -115,7 +115,6 @@ def generate():
 def aic():
     JstAiCommit().run()
 
-
 @app.command(name="translate", help="Avtomatik tarjima")
 def translate():
     Translate().run()
