@@ -97,27 +97,38 @@ def install_module(
 
 
 @app.command(name="create", help="Yangi loyiha yaratish")
-def create_project():
+def create_project(version: str = typer.Option(None, "--version", "-v")):
+    if version is None:
+        version = Github().latest_release()
+        print("version: ", version)
+    else:
+        versions = Github().releases()
+        if version not in versions:
+            raise Exception(
+                "{} mavjud emas boshqa versiya tanlang: {}".format(
+                    version, ", ".join(versions)
+                )
+            )
     template = questionary.text("Template: ", default="django").ask()
     if template.startswith("http") is not True:
-        template = "http://github.com/JscorpTech/{}".format(template)
-    branch = questionary.select(
-        "Qaysi versiyadan foydalanmoqchisiz: ", Github().branches()
-    ).ask()
-    cookiecutter(template, checkout=branch)
+        template = "https://github.com/JscorpTech/{}".format(template)
+    cookiecutter(template, checkout=version)
 
 
 @app.command(name="generate", help="Compoment generatsiya qilish")
 def generate():
     Generate().run()
 
+
 @app.command(name="aic", help="O'zgarishlarga qarab atomatik git commit yaratadi")
 def aic():
     JstAiCommit().run()
 
+
 @app.command(name="translate", help="Avtomatik tarjima")
 def translate():
     Translate().run()
+
 
 if __name__ == "__main__":
     app()
