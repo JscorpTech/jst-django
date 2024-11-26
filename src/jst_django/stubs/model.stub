@@ -12,4 +12,4 @@ class {class_name}(AbstractBaseModel):
     class Meta:
         db_table = "{name}"
         verbose_name = _("{class_name}")
-        verbose_name_plural = _("{class_name}")
+        verbose_name_plural = _("{class_name}s")
