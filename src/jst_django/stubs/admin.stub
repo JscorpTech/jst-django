@@ -1,5 +1,8 @@
 ##from unfold.admin import ModelAdmin
+##from django.contrib import admin
+!!from ..models import {name_cap}Model
 ##
 
+@admin.register({name_cap}Model)
 class {class_name}(ModelAdmin):
-    ...
+    list_display = ("__str__",)

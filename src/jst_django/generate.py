@@ -2,7 +2,7 @@ from typing import List, Union, Optional
 import questionary.question
 import os
 import questionary
-import black
+import black, isort
 
 
 class Generate:
@@ -50,7 +50,7 @@ class Generate:
             "validator": "validator.stub",
             "form": "form.stub",
             "filter": "filter.stub",
-            "signal": "signal.stub"
+            "signal": "signal.stub",
         }
 
     def directory_ls(self, path: Union[str], ignore_init=True) -> List[str]:
@@ -62,9 +62,10 @@ class Generate:
         return response
 
     def format_code(self, file_path: Union[str]) -> None:
-        """Black format code"""
+        """Black and Isort format code"""
+        isort.settings.Config(profile="black", line_length=120)
         with open(file_path, "r") as file:
-            code = black.format_str(file.read(), mode=black.FileMode())
+            code = isort.code(black.format_str(file.read(), mode=black.FileMode()))
         with open(file_path, "w") as file:
             file.write(code)
 
@@ -75,16 +76,20 @@ class Generate:
     def get_stub(self, name: Union[str], append: Union[bool] = False) -> str:
         """Get stub"""
         response = ""
+        top_content = ""
         with open(os.path.join(self.path["stubs"], self.stubs[name])) as file:
             for chunk in file.readlines():
-                if append and chunk.startswith("##"):
+                if chunk.startswith("!!"):
+                    top_content += chunk.replace("!!", "", 2)
                     continue
-                if not append and chunk.startswith("##"):
+                elif append and chunk.startswith("##"):
+                    continue
+                elif not append and chunk.startswith("##"):
                     chunk = chunk.replace("##", "", 2)
                 response += chunk
         if append:
             response = "\n" + response
-        return response
+        return top_content, response
 
     def get_module_name(self, prefix: Union[str] = ""):
         return f"{str(self.name).capitalize()}{prefix}"
@@ -96,10 +101,19 @@ class Generate:
         prefix: Union[str] = "",
         append: Union[bool] = False,
     ):
-        with open(file_path, "a") as file:
+        if not os.path.exists(file_path):
+            open(file_path, "w").close()
+        with open(file_path, "r+") as file:
+            file_content = file.read()
+            top_content, content = self.get_stub(stub, append=append)
+            file.seek(0)
+            file.write(top_content.format(name_cap=self.name.capitalize()))
+            file.write(file_content)
             file.write(
-                self.get_stub(stub, append=append).format(
-                    class_name=self.get_module_name(prefix)
+                content.format(
+                    class_name=self.get_module_name(prefix),
+                    name=self.name,
+                    name_cap=self.name.capitalize(),
                 )
             )
 
@@ -114,7 +128,9 @@ class Generate:
                 os.makedirs(module_dir)
             if not os.path.exists(file_path):
                 with open(init_path, "a") as file:
-                    file.write(self.get_stub("init").format(file_name=self.file_name))
+                    file.write(
+                        self.get_stub("init")[1].format(file_name=self.file_name)
+                    )
                 self.format_code(init_path)
                 self.write_file(file_path, module, module.capitalize())
             else:

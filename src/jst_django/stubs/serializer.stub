@@ -1,7 +1,8 @@
+!!from ..models import {name_cap}Model
 ##from rest_framework import serializers
 ##
 
 class {class_name}(serializers.ModelSerializer):
     class Meta:
-        #model = model
-        fields = []
+        model = {name_cap}Model
+        fields = ("id",)

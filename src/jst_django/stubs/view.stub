@@ -1,8 +1,10 @@
+!!from ..models import {name_cap}Model
+!!from ..serializers import {name_cap}Serializer
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
 ##from rest_framework.permissions import AllowAny
 ##
 
 class {class_name}(ReadOnlyModelViewSet):
-    #queryset = Model.objects.all()
-    #serializer_class = Serializer
+    queryset = {name_cap}Model.objects.all()
+    serializer_class = {name_cap}Serializer
     permission_classes = [AllowAny]
