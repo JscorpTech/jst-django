@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Tuple, Any
+from typing import Union, List, Tuple, Any
 import requests
 from .logger import logging
 from polib import pofile
@@ -21,11 +21,7 @@ class Translate:
     def translate(self, message, source, target) -> Union[Tuple]:
         url = "https://websocket.tahrirchi.uz/handle-batch"
 
-        payload = {
-            "jobs": [{ "text": message }],
-            "source_lang": source,
-            "target_lang": target
-        }
+        payload = {"jobs": [{"text": message}], "source_lang": source, "target_lang": target}
         headers = {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "uz,en-US;q=0.9,en;q=0.8,ru;q=0.7",
@@ -37,23 +33,23 @@ class Translate:
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-site",
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-            "sec-ch-ua": "\"Chromium\";v=\"130\", \"Google Chrome\";v=\"130\", \"Not?A_Brand\";v=\"99\"",
+            "sec-ch-ua": '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
             "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Linux\"",
-            "content-type": "application/json"
+            "sec-ch-ua-platform": '"Linux"',
+            "content-type": "application/json",
         }
         try:
             response = requests.post(url, json=payload, headers=headers)
-            return True, response.json()['sentences'][0]['translated']
+            return True, response.json()["sentences"][0]["translated"]
         except Exception as e:
             logging.error(e)
             return False, message
-    
+
     def get_messages(self, path: Union[str]) -> Any:
         messages = pofile(path)
         self.messages = messages
         return messages
-    
+
     def get_pofiles(self) -> Union[List]:
         res = []
         for i in os.listdir(os.path.join(os.getcwd(), "resources/locale")):

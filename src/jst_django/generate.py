@@ -128,9 +128,7 @@ class Generate:
                 os.makedirs(module_dir)
             if not os.path.exists(file_path):
                 with open(init_path, "a") as file:
-                    file.write(
-                        self.get_stub("init")[1].format(file_name=self.file_name)
-                    )
+                    file.write(self.get_stub("init")[1].format(file_name=self.file_name))
                 self.format_code(init_path)
                 self.write_file(file_path, module, module.capitalize())
             else:
