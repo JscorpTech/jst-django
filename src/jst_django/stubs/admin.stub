@@ -1,6 +1,6 @@
+!!from ..models import {name_cap}Model
 ##from unfold.admin import ModelAdmin
 ##from django.contrib import admin
-!!from ..models import {name_cap}Model
 ##
 
 @admin.register({name_cap}Model)
