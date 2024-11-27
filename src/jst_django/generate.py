@@ -107,7 +107,7 @@ class Generate:
             file_content = file.read()
             top_content, content = self.get_stub(stub, append=append)
             file.seek(0)
-            file.write(top_content.format(name_cap=self.name.capitalize()))
+            file.write(top_content.format(name_cap=self.name.capitalize(), file_name=self.file_name))
             file.write(file_content)
             file.write(
                 content.format(
@@ -117,6 +117,16 @@ class Generate:
                 )
             )
 
+    def make_dir_if_not(self, path):
+        """Agar papka mavjud bo'lmasa yaratadi"""
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    def import_init(self, init_path: Union[str], file_name: Union[str]):
+        with open(init_path, "a") as file:
+            file.write(self.get_stub("init")[1].format(file_name=file_name))
+        self.format_code(init_path)
+
     def make_folders(self, app: Union[str], modules: Union[List[str]]) -> bool:
         """Agar kerakli papkalar topilmasa yaratadi"""
         apps_dir = os.path.join(self.path["apps"], app)
@@ -124,12 +134,14 @@ class Generate:
             module_dir = os.path.join(apps_dir, self.path[module])
             file_path = os.path.join(module_dir, f"{self.file_name}.py")
             init_path = os.path.join(module_dir, "__init__.py")
-            if not os.path.exists(module_dir):
-                os.makedirs(module_dir)
+            self.make_dir_if_not(module_dir)
+            if module == "serializer":
+                module_dir = os.path.join(module_dir, self.file_name)
+                file_path = os.path.join(module_dir, f"{self.name}.py")
+                self.make_dir_if_not(module_dir)
+                self.import_init(os.path.join(module_dir, "__init__.py"), file_name=self.name)
             if not os.path.exists(file_path):
-                with open(init_path, "a") as file:
-                    file.write(self.get_stub("init")[1].format(file_name=self.file_name))
-                self.format_code(init_path)
+                self.import_init(init_path, self.file_name)
                 self.write_file(file_path, module, module.capitalize())
             else:
                 self.write_file(file_path, module, module.capitalize(), append=True)

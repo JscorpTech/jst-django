@@ -1,8 +1,22 @@
-!!from ..models import {name_cap}Model
+!!from ...models import {name_cap}Model
 ##from rest_framework import serializers
 ##
 
-class {class_name}(serializers.ModelSerializer):
+class Base{class_name}(serializers.ModelSerializer):
     class Meta:
         model = {name_cap}Model
+
+
+class List{class_name}(Base{class_name}):
+    class Meta(Base{class_name}.Meta):
+        fields = ("id",)
+
+
+class Retrieve{class_name}(Base{class_name}):
+    class Meta(Base{class_name}.Meta):
+        fields = ("id",)
+
+
+class Create{class_name}(Base{class_name}):
+    class Meta(Base{class_name}.Meta):
         fields = ("id",)

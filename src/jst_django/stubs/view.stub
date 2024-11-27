@@ -1,10 +1,28 @@
 !!from ..models import {name_cap}Model
-!!from ..serializers import {name_cap}Serializer
+!!from ..serializers.{file_name} import Retrieve{name_cap}Serializer, List{name_cap}Serializer, Create{name_cap}Serializer  
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
+##from typing import Any
 ##from rest_framework.permissions import AllowAny
 ##
 
 class {class_name}(ReadOnlyModelViewSet):
     queryset = {name_cap}Model.objects.all()
-    serializer_class = {name_cap}Serializer
-    permission_classes = [AllowAny]
+
+    def get_serializer_class(self) -> Any:
+        match self.action:
+            case "list":
+                return List{name_cap}Serializer
+            case "retrieve":
+                return Retrieve{name_cap}Serializer
+            case "create":
+                return Create{name_cap}Serializer
+            case _:
+                return List{name_cap}Serializer
+
+    def get_permissions(self) -> Any:
+        perms = []
+        match self.action:
+            case _:
+                perms.extend([AllowAny])
+        self.permission_classes = perms
+        return super().get_permissions()
