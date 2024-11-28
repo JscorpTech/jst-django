@@ -5,18 +5,16 @@
 class Base{class_name}(serializers.ModelSerializer):
     class Meta:
         model = {name_cap}Model
+        fields = ("id",)
 
 
 class List{class_name}(Base{class_name}):
-    class Meta(Base{class_name}.Meta):
-        fields = ("id",)
+    class Meta(Base{class_name}.Meta): ...
 
 
 class Retrieve{class_name}(Base{class_name}):
-    class Meta(Base{class_name}.Meta):
-        fields = ("id",)
+    class Meta(Base{class_name}.Meta): ...
 
 
 class Create{class_name}(Base{class_name}):
-    class Meta(Base{class_name}.Meta):
-        fields = ("id",)
+    class Meta(Base{class_name}.Meta): ...
