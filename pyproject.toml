@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jst-django"
-version = "1.2.0"
+version = "v2.4"
 description = ""
 authors = ["A'zamov Samandar <JscorpTech@gmail.com>"]
 readme = "README.md"
@@ -48,10 +48,13 @@ colorlog = "^6.9.0"
 polib = "^1.2.0"
 tqdm = "^4.67.0"
 jst-aicommit = "^0.1.5"
+isort = "^5.13.2"
 
 [tool.poetry.scripts]
 jst = 'jst_django.jst:app'
 
+[tool.black]
+line-length = 120
 
 [build-system]
 requires = ["poetry-core"]
