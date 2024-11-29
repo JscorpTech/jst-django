@@ -5,7 +5,7 @@
 class Base{class_name}(serializers.ModelSerializer):
     class Meta:
         model = {name_cap}Model
-        fields = ("id",)
+        exclude = []
 
 
 class List{class_name}(Base{class_name}):

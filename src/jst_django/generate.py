@@ -3,6 +3,7 @@ import questionary.question
 import os
 import questionary
 import black, isort
+from pathlib import Path
 
 
 class Generate:
@@ -70,7 +71,7 @@ class Generate:
             file.write(code)
 
     def get_apps(self) -> List[str]:
-        """Get django apps"""
+        """Django applar ro'yxatini qaytaradi"""
         return self.directory_ls(self.path["apps"])
 
     def get_stub(self, name: Union[str], append: Union[bool] = False) -> str:
@@ -119,10 +120,10 @@ class Generate:
 
     def make_dir_if_not(self, path):
         """Agar papka mavjud bo'lmasa yaratadi"""
-        if not os.path.exists(path):
-            os.makedirs(path)
+        Path(path).mkdir(parents=True, exist_ok=True)
 
     def import_init(self, init_path: Union[str], file_name: Union[str]):
+        """__init__.py fayliga kerakli fayillarni import qiladi mavjud bo'lmasa yaratadi"""
         with open(init_path, "a") as file:
             file.write(self.get_stub("init")[1].format(file_name=file_name))
         self.format_code(init_path)
