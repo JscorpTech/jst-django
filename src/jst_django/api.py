@@ -33,7 +33,7 @@ class Github:
 
     def check_version(self, version: Union[str], versions: Union[List[str]]):
         """Versionni tekshirish"""
-        if version in versions:
+        if version not in versions:
             raise Exception("{} mavjud emas boshqa versiya tanlang: {}".format(version, ", ".join(versions)))
         return versions
 

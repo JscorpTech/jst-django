@@ -67,12 +67,11 @@ class Module:
         api = Github("module-%s" % module)
         if module_name is None:
             module_name = module
-        if module.startswith("http") is not True:
-            if version is None:
-                version = api.latest_release()
-            else:
-                api.releases(version)
-            module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
+        if version is None:
+            version = api.latest_release()
+        else:
+            api.releases(version)
+        module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
 
         self._download_and_extract_module(module_name, module)
         print("Modul o'rnatish yakunlandi")
