@@ -4,8 +4,9 @@ from typing import Union, List
 
 class Github:
 
-    def __init__(self) -> None:
+    def __init__(self, repo: str = "django") -> None:
         self.project_id = "JscorpTech"
+        self.repo = repo
         self.relase_urls = {
             "list": "releases",
             "latest": "releases/latest",
@@ -13,21 +14,28 @@ class Github:
         }
 
     def request(self, action):
-        url = "https://api.github.com/repos/{}/django/{}".format(
-            self.project_id, action
-        )
+        url = "https://api.github.com/repos/{}/{}/{}".format(self.project_id, self.repo, action)
         response = requests.get(url)
         if response.status_code == 200:
             return response.json()
         raise Exception("Server bilan aloqa yo'q")
 
-    def releases(self) -> Union[List[str]]:
+    def releases(self, version=None) -> Union[List[str]]:
         """Barcha releaselarni"""
-        return list(map(lambda x: x["name"], self.request(self.relase_urls["list"])))
+        versions = list(map(lambda x: x["name"], self.request(self.relase_urls["list"])))
+        if version:
+            return self.check_version(version, versions)
+        return versions
 
     def latest_release(self) -> Union[str]:
         """Oxirgi release"""
         return self.request(self.relase_urls["latest"])["name"]
+
+    def check_version(self, version: Union[str], versions: Union[List[str]]):
+        """Versionni tekshirish"""
+        if version in versions:
+            raise Exception("{} mavjud emas boshqa versiya tanlang: {}".format(version, ", ".join(versions)))
+        return versions
 
     def branches(self):
         response = []
