@@ -2,8 +2,7 @@ from typing import List, Union, Optional
 import questionary.question
 import os
 import questionary
-import black, isort
-from pathlib import Path
+from .utils import File, Code
 
 
 class Generate:
@@ -54,7 +53,7 @@ class Generate:
             "signal": "signal.stub",
         }
 
-    def directory_ls(self, path: Union[str], ignore_init=True) -> List[str]:
+    def _directory_ls(self, path: Union[str], ignore_init=True) -> List[str]:
         """Directory items list"""
         response = os.listdir(path)
         if ignore_init:
@@ -62,19 +61,11 @@ class Generate:
         response.remove("logs")
         return response
 
-    def format_code(self, file_path: Union[str]) -> None:
-        """Black and Isort format code"""
-        isort.settings.Config(profile="black", line_length=120)
-        with open(file_path, "r") as file:
-            code = isort.code(black.format_str(file.read(), mode=black.FileMode()))
-        with open(file_path, "w") as file:
-            file.write(code)
-
-    def get_apps(self) -> List[str]:
+    def _get_apps(self) -> List[str]:
         """Django applar ro'yxatini qaytaradi"""
-        return self.directory_ls(self.path["apps"])
+        return self._directory_ls(self.path["apps"])
 
-    def get_stub(self, name: Union[str], append: Union[bool] = False) -> str:
+    def _get_stub(self, name: Union[str], append: Union[bool] = False) -> str:
         """Get stub"""
         response = ""
         top_content = ""
@@ -92,10 +83,10 @@ class Generate:
             response = "\n" + response
         return top_content, response
 
-    def get_module_name(self, prefix: Union[str] = ""):
+    def _get_module_name(self, prefix: Union[str] = ""):
         return f"{str(self.name).capitalize()}{prefix}"
 
-    def write_file(
+    def _write_file(
         self,
         file_path: Union[str],
         stub: Union[str],
@@ -106,27 +97,23 @@ class Generate:
             open(file_path, "w").close()
         with open(file_path, "r+") as file:
             file_content = file.read()
-            top_content, content = self.get_stub(stub, append=append)
+            top_content, content = self._get_stub(stub, append=append)
             file.seek(0)
             file.write(top_content.format(name_cap=self.name.capitalize(), file_name=self.file_name))
             file.write(file_content)
             file.write(
                 content.format(
-                    class_name=self.get_module_name(prefix),
+                    class_name=self._get_module_name(prefix),
                     name=self.name,
                     name_cap=self.name.capitalize(),
                 )
             )
 
-    def make_dir_if_not(self, path):
-        """Agar papka mavjud bo'lmasa yaratadi"""
-        Path(path).mkdir(parents=True, exist_ok=True)
-
-    def import_init(self, init_path: Union[str], file_name: Union[str]):
+    def _import_init(self, init_path: Union[str], file_name: Union[str]):
         """__init__.py fayliga kerakli fayillarni import qiladi mavjud bo'lmasa yaratadi"""
         with open(init_path, "a") as file:
-            file.write(self.get_stub("init")[1].format(file_name=file_name))
-        self.format_code(init_path)
+            file.write(self._get_stub("init")[1].format(file_name=file_name))
+        Code.format_code(init_path)
 
     def make_folders(self, app: Union[str], modules: Union[List[str]]) -> bool:
         """Agar kerakli papkalar topilmasa yaratadi"""
@@ -135,18 +122,18 @@ class Generate:
             module_dir = os.path.join(apps_dir, self.path[module])
             file_path = os.path.join(module_dir, f"{self.file_name}.py")
             init_path = os.path.join(module_dir, "__init__.py")
-            self.make_dir_if_not(module_dir)
+            File.mkdir(module_dir)
             if module == "serializer":
                 module_dir = os.path.join(module_dir, self.file_name)
                 file_path = os.path.join(module_dir, f"{self.name}.py")
-                self.make_dir_if_not(module_dir)
-                self.import_init(os.path.join(module_dir, "__init__.py"), file_name=self.name)
+                File.mkdir(module_dir)
+                self._import_init(os.path.join(module_dir, "__init__.py"), file_name=self.name)
             if not os.path.exists(file_path):
-                self.import_init(init_path, self.file_name)
-                self.write_file(file_path, module, module.capitalize())
+                self._import_init(init_path, self.file_name)
+                self._write_file(file_path, module, module.capitalize())
             else:
-                self.write_file(file_path, module, module.capitalize(), append=True)
-            self.format_code(file_path)
+                self._write_file(file_path, module, module.capitalize(), append=True)
+            Code.format_code(file_path)
         return True
 
     def run(self) -> None:
@@ -154,6 +141,6 @@ class Generate:
         self.file_name = questionary.text("File Name: ").ask()
         self.name = questionary.text("Name: ").ask()
 
-        app = questionary.select("Appni tanlang", choices=self.get_apps()).ask()
+        app = questionary.select("Appni tanlang", choices=self._get_apps()).ask()
         modules = questionary.checkbox("Kerakli modullarni tanlang", self.modules).ask()
         self.make_folders(app, modules)
