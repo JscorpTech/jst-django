@@ -7,5 +7,5 @@ class File:
         pass
 
     @staticmethod
-    def mkdir(self, path):
+    def mkdir(path):
         Path(path).mkdir(parents=True, exist_ok=True)
