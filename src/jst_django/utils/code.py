@@ -8,7 +8,7 @@ class Code:
         pass
 
     @staticmethod
-    def format_code(self, file_path: Union[str]) -> None:
+    def format_code(file_path: Union[str]) -> None:
         """Black and Isort format code"""
         isort.settings.Config(profile="black", line_length=120)
         with open(file_path, "r") as file:
