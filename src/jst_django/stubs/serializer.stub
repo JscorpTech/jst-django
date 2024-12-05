@@ -5,7 +5,10 @@
 class Base{class_name}(serializers.ModelSerializer):
     class Meta:
         model = {name_cap}Model
-        exclude = []
+        exclude = [
+            "created_at",
+            "updated_at",
+        ]
 
 
 class List{class_name}(Base{class_name}):

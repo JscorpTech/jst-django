@@ -3,8 +3,10 @@
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
 ##from typing import Any
 ##from rest_framework.permissions import AllowAny
+##from drf_spectacular.utils import extend_schema
 ##
 
+@extend_schema(tags=["{name}"], deprecated=True)
 class {class_name}(ReadOnlyModelViewSet):
     queryset = {name_cap}Model.objects.all()
 

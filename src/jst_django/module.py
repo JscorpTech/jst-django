@@ -11,9 +11,9 @@ from typing import Union
 
 class Module:
     modules = {
+        "default": "https://github.com/JscorpTech/module-default.git",
         "authbot": "https://github.com/JscorpTech/module-authbot.git",
         "websocket": "https://github.com/JscorpTech/module-websocket.git",
-        "default": "https://github.com/JscorpTech/module-default.git",
     }
 
     def __init__(self): ...

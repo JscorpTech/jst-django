@@ -5,4 +5,4 @@
 
 @admin.register({name_cap}Model)
 class {class_name}(ModelAdmin):
-    list_display = ("__str__",)
+    list_display = ("id", "__str__",)
