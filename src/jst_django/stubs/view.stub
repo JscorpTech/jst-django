@@ -6,7 +6,7 @@
 ##from drf_spectacular.utils import extend_schema
 ##
 
-@extend_schema(tags=["{name}"], deprecated=True)
+@extend_schema(tags=["{name}"])
 class {class_name}(ReadOnlyModelViewSet):
     queryset = {name_cap}Model.objects.all()
 
