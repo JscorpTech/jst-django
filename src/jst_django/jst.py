@@ -52,6 +52,11 @@ def init():
     Jst().make_config()
 
 
+@app.command(name="requirements", help="Kerakli kutubxonalar")
+def requirements():
+    Jst().requirements()
+
+
 @app.command(name="translate", help="Avtomatik tarjima")
 def translate():
     Translate().run()

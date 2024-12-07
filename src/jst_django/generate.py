@@ -55,7 +55,7 @@ class Generate:
             "form": "form.stub",
             "filter": "filter.stub",
             "signal": "signal.stub",
-        }
+        } | self.config.get("stubs", {})
 
     def _directory_ls(self, path: Union[str]) -> Generator[Union[Path], None, None]:
         """Directory items list"""
@@ -71,11 +71,20 @@ class Generate:
             if item.joinpath("apps.py").exists():
                 yield item.name
 
-    def _get_stub(self, name: Union[str], append: Union[bool] = False) -> str:
+    def __get_stub_path(self, name):
+        """Stubfayil manzilini olish"""
+        if Path(self.stubs[name]).exists():
+            return self.stubs[name]
+        path = Path(self.path["stubs"], self.stubs[name])
+        if path.exists():
+            return path
+        raise Exception("Stub fayil mavjud emas")
+
+    def _read_stub(self, name: Union[str], append: Union[bool] = False) -> str:
         """Get stub"""
         response = ""
         top_content = ""
-        with open(join(self.path["stubs"], self.stubs[name])) as file:
+        with open(self.__get_stub_path(name)) as file:
             for chunk in file.readlines():
                 if chunk.startswith("!!"):
                     top_content += chunk.replace("!!", "", 2)
@@ -103,7 +112,7 @@ class Generate:
             open(file_path, "w").close()
         with open(file_path, "r+") as file:
             file_content = file.read()
-            top_content, content = self._get_stub(stub, append=append)
+            top_content, content = self._read_stub(stub, append=append)
             file.seek(0)
             file.write(top_content.format(name_cap=self.name.capitalize(), file_name=self.file_name))
             file.write(file_content)
@@ -118,7 +127,7 @@ class Generate:
     def _import_init(self, init_path: Union[str], file_name: Union[str]):
         """__init__.py fayliga kerakli fayillarni import qiladi mavjud bo'lmasa yaratadi"""
         with open(init_path, "a") as file:
-            file.write(self._get_stub("init")[1].format(file_name=file_name))
+            file.write(self._read_stub("init")[1].format(file_name=file_name))
         Code.format_code(init_path)
 
     def make_folders(self, app: Union[str], modules: Union[List[str]]) -> bool:

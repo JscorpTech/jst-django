@@ -8,6 +8,7 @@ import shutil
 from uuid import uuid4
 from typing import Union
 from .utils import Jst
+from rich import print
 
 
 class Module:
@@ -61,7 +62,7 @@ class Module:
             with open(os.path.join(extract_dir, "apps.py"), "r+") as file:
                 data = file.read()
                 file.seek(0)
-                file.write(data.replace("{{module_name}}", module_name))
+                file.write(data.replace("%s{{module_name}}" % self.config.get("apps", ""), module_name))
                 file.truncate()
 
     def run(self, module_name, version=None):
@@ -73,7 +74,8 @@ class Module:
             version = api.latest_release()
         else:
             api.releases(version)
+        print("[bold red]version: %s[/bold red]" % version)
         module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
 
         self._download_and_extract_module(module_name, module)
-        print("Modul o'rnatish yakunlandi")
+        print("[bold green]Modul o'rnatish yakunlandi[/bold green]")
