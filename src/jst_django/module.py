@@ -7,6 +7,7 @@ import questionary
 import shutil
 from uuid import uuid4
 from typing import Union
+from .utils import Jst
 
 
 class Module:
@@ -16,7 +17,8 @@ class Module:
         "websocket": "https://github.com/JscorpTech/module-websocket.git",
     }
 
-    def __init__(self): ...
+    def __init__(self):
+        self.config = Jst().load_config()
 
     def _subfolder_to_parent(self, path):
         """ichki papkadagi ko'dlarni parent papkaga ko'chirish"""
@@ -37,7 +39,7 @@ class Module:
         return file
 
     def _extract(self, module_name, zip_path):
-        modules_dir = os.path.join(os.getcwd(), "core/apps/")
+        modules_dir = os.path.join(os.getcwd(), self.config["dirs"]["apps"])
         extract_dir = os.path.join(modules_dir, module_name)
         if os.path.exists(extract_dir):
             raise Exception("Modul mavjud")

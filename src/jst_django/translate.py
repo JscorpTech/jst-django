@@ -5,6 +5,7 @@ from polib import pofile
 from tqdm import tqdm
 import questionary
 import os
+from .utils import Jst
 
 
 class Translate:
@@ -17,6 +18,7 @@ class Translate:
             "rus_Cyrl",
             "eng_Latn",
         ]
+        self.config = Jst()
 
     def translate(self, message, source, target) -> Union[Tuple]:
         url = "https://websocket.tahrirchi.uz/handle-batch"
@@ -52,17 +54,21 @@ class Translate:
 
     def get_pofiles(self) -> Union[List]:
         res = []
-        for i in os.listdir(os.path.join(os.getcwd(), "resources/locale")):
+        for i in os.listdir(os.path.join(os.getcwd(), self.config["dirs"]["locale"])):
             if not i.startswith("."):
                 res.append(i)
         return res
 
     def run(self) -> None:
         pofiles = self.get_pofiles()
-        file = questionary.select("Fayil joylashgan papkani tanlang: resources/locale", choices=pofiles).ask()
+        file = questionary.select(
+            "Fayil joylashgan papkani tanlang: %s" % self.config["dirs"]["locale"], choices=pofiles
+        ).ask()
         source = questionary.select("Hozirli fayil tilini tanlang: ", choices=self.langs).ask()
         target = questionary.select("Tarjima qilish kerak bo'lgan til: ", choices=self.langs).ask()
-        self.get_messages(os.path.join(os.getcwd(), "resources/locale/{}/LC_MESSAGES/django.po".format(file)))
+        self.get_messages(
+            os.path.join(os.getcwd(), "{}/{}/LC_MESSAGES/django.po".format(self.config["dirs"]["locale"], file))
+        )
         progress = tqdm(total=len(self.messages))
         for index, message in enumerate(self.messages):
             if message.msgstr != "":

@@ -6,6 +6,7 @@ from cookiecutter.main import cookiecutter
 import questionary
 from typing import Annotated
 from .generate import Generate
+from .utils import Jst
 from .api import Github
 from .translate import Translate
 from .module import Module
@@ -16,22 +17,9 @@ app = typer.Typer()
 BASE_DIR = os.getcwd()
 
 
-def error(data):
-    print(f"[bold red]{data}[/bold red]")
-
-
-def success(data):
-    print(f"[bold green]{data}[/bold green]")
-
-
-def info(data):
-    print(f"[bold blue]{data}[/bold blue]")
-
-
 @app.command(name="install", help="Modul o'rnatish")
 def install_module(
-    module_name: Annotated[str, typer.Argument()] = None,
-    version: str = typer.Option(None, "--version", "-v")
+    module_name: Annotated[str, typer.Argument()] = None, version: str = typer.Option(None, "--version", "-v")
 ):
     Module().run(module_name, version)
 
@@ -57,6 +45,11 @@ def generate():
 @app.command(name="aic", help="O'zgarishlarga qarab atomatik git commit yaratadi")
 def aic():
     JstAiCommit().run()
+
+
+@app.command(name="init", help="jst.json config faylini yaratish")
+def init():
+    Jst().make_config()
 
 
 @app.command(name="translate", help="Avtomatik tarjima")
