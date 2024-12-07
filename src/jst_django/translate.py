@@ -18,7 +18,7 @@ class Translate:
             "rus_Cyrl",
             "eng_Latn",
         ]
-        self.config = Jst()
+        self.config = Jst().load_config()
 
     def translate(self, message, source, target) -> Union[Tuple]:
         url = "https://websocket.tahrirchi.uz/handle-batch"
