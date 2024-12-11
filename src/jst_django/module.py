@@ -62,7 +62,7 @@ class Module:
             with open(os.path.join(extract_dir, "apps.py"), "r+") as file:
                 data = file.read()
                 file.seek(0)
-                file.write(data.replace("%s{{module_name}}" % self.config.get("apps", ""), module_name))
+                file.write(data.replace("{{module_name}}", "%s%s" % (self.config.get("apps", ""), module_name)))
                 file.truncate()
 
     def run(self, module_name, version=None):
