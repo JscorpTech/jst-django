@@ -32,11 +32,15 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
     else:
         Github().releases(version)
     template = questionary.text("Template: ", default="django").ask()
-    if template.startswith("http") is not True:
+    if template == "django" or (template.startswith("http") is not True and not os.path.exists(template)):
         template = "https://github.com/JscorpTech/{}".format(template)
     choices = [
+        "cacheops",
         "silk",
         "storage",
+        "rosetta",
+        "channels",
+        "ckeditor",
     ]
     questions = {
         "project_name": {"type": "text", "message": "Project name: ", "default": "django"},
@@ -73,14 +77,17 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
     for key, value in questions.items():
         method = value.pop("type")
         answers[key] = getattr(questionary, method)(**value).ask()
-    answers["packages"] = {choice: choice in answers["packages"] for choice in choices}
-    answers["project_slug"] = (
-        answers["project_name"].lower().replace(" ", "_").replace("-", "_").replace(".", "_").trim()
-    )
+    answers["project_slug"] = answers["project_name"].lower().replace(" ", "_").replace("-", "_").replace(".", "_")
+    packages = answers.pop("packages")
+    context = {
+        **{choice: choice in packages for choice in choices},
+        **answers,
+    }
     cookiecutter(
         template,
         checkout=version,
-        extra_context=answers,
+        no_input=True,
+        extra_context=context,
     )
 
 
