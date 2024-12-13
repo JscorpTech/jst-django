@@ -74,6 +74,9 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         method = value.pop("type")
         answers[key] = getattr(questionary, method)(**value).ask()
     answers["packages"] = {choice: choice in answers["packages"] for choice in choices}
+    answers["project_slug"] = (
+        answers["project_name"].lower().replace(" ", "_").replace("-", "_").replace(".", "_").trim()
+    )
     cookiecutter(
         template,
         checkout=version,
