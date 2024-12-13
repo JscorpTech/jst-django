@@ -34,7 +34,16 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
     template = questionary.text("Template: ", default="django").ask()
     if template.startswith("http") is not True:
         template = "https://github.com/JscorpTech/{}".format(template)
-    cookiecutter(template, checkout=version)
+    choices = [
+        "silk",
+        "storage",
+    ]
+    packages = questionary.checkbox("O'rtailadigan kutubxonalarni tanlang", choices=choices).ask()
+    cookiecutter(
+        template,
+        checkout=version,
+        extra_context={choice: choice in packages for choice in choices},
+    )
 
 
 @app.command(name="generate", help="Compoment generatsiya qilish")
