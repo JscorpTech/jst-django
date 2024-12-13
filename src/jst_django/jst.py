@@ -38,11 +38,46 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         "silk",
         "storage",
     ]
-    packages = questionary.checkbox("O'rtailadigan kutubxonalarni tanlang", choices=choices).ask()
+    questions = {
+        "project_name": {"type": "text", "message": "Project name: ", "default": "django"},
+        "settings_module": {
+            "type": "select",
+            "message": "Settings file",
+            "choices": [
+                "config.settings.local",
+                "config.settings.production",
+            ],
+        },
+        "packages": {
+            "type": "checkbox",
+            "message": "O'rtailadigan kutubxonalarni tanlang",
+            "choices": choices,
+        },
+        "runner": {
+            "type": "select",
+            "message": "Runner",
+            "choices": ["wsgi", "asgi"],
+        },
+        "script": {
+            "type": "select",
+            "message": "Script file",
+            "choices": ["entrypoint.sh", "entrypoint-server.sh"],
+        },
+        "key": {"type": "text", "default": "key", "message": "Django key"},
+        "port": {"type": "text", "default": "8081", "message": "Port"},
+        "phone": {"type": "text", "default": "998888112309", "message": "Default admin phone"},
+        "password": {"type": "text", "default": "2309", "message": "Admin password"},
+        "max_line_length": {"type": "text", "default": "120", "message": "Flake8 and black max line length"},
+    }
+    answers = {}
+    for key, value in questions.items():
+        method = value.pop("type")
+        answers[key] = getattr(questionary, method)(**value).ask()
+    answers["packages"] = {choice: choice in answers["packages"] for choice in choices}
     cookiecutter(
         template,
         checkout=version,
-        extra_context={choice: choice in packages for choice in choices},
+        extra_context=answers,
     )
 
 
