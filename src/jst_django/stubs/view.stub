@@ -4,10 +4,11 @@
 ##from typing import Any
 ##from rest_framework.permissions import AllowAny
 ##from drf_spectacular.utils import extend_schema
+##from django_core.mixins import BaseViewSetMixin
 ##
 
 @extend_schema(tags=["{name}"])
-class {class_name}(ReadOnlyModelViewSet):
+class {class_name}(BaseViewSetMixin, ReadOnlyModelViewSet):
     queryset = {name_cap}Model.objects.all()
 
     def get_serializer_class(self) -> Any:
