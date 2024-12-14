@@ -14,10 +14,7 @@ class Jst:
                 "apps": "./",
                 "locale": "./locale/",
             },
-            "stubs": {
-                "model": "django/model.stub",
-                "serializer": "django/serializer.stub",
-            },
+            "stubs": {},
         }
 
     def _check_config(self) -> Union[bool]:
