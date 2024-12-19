@@ -1,7 +1,7 @@
-!!from ..models import {name_cap}Model
+!!from ..models import %(name_cap)sModel
 ##from modeltranslation.translator import TranslationOptions, register
 ##
 
-@register({name_cap}Model)
-class {class_name}(TranslationOptions):
+@register(%(name_cap)sModel)
+class %(class_name)s(TranslationOptions):
     fields = []

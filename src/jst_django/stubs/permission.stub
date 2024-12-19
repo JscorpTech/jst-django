@@ -1,7 +1,7 @@
 ##from rest_framework import permissions
 ##
 
-class {class_name}(permissions.BasePermission):
+class %(class_name)s(permissions.BasePermission):
 
     def __init__(self) -> None:
         ...

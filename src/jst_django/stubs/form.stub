@@ -1,9 +1,9 @@
-!!from ..models import {name_cap}Model
+!!from ..models import %(name_cap)sModel
 ##from django import forms
 ##
 
-class {class_name}(forms.ModelForm):
+class %(class_name)s(forms.ModelForm):
 
     class Meta:
-        model = {name_cap}Model
+        model = %(name_cap)sModel
         fields = "__all__"

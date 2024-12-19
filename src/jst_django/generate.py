@@ -1,5 +1,4 @@
 from typing import List, Union, Optional, Generator
-import questionary.question
 import os
 import questionary
 from .utils import File, Code, Jst
@@ -57,31 +56,31 @@ class Generate:
             "signal": "signal.stub",
         } | self.config.get("stubs", {})
 
-    def _directory_ls(self, path: Union[str]) -> Generator[Union[Path], None, None]:
+    def _directory_ls(self, path: str) -> Generator[Path, None, None]:
         """Directory items list"""
         ignore = ["logs"]
         for item in Path(path).iterdir():
             if item.name not in ignore and item.is_dir():
                 yield item
 
-    def _get_apps(self) -> Generator[Union[str], None, None]:
-        """Django applar ro'yxatini qaytaradi"""
+    def _get_apps(self) -> Generator[str, None, None]:
+        """Return list of Django apps"""
         dirs = self._directory_ls(self.path["apps"])
         for item in dirs:
             if item.joinpath("apps.py").exists():
                 yield item.name
 
-    def __get_stub_path(self, name):
-        """Stubfayil manzilini olish"""
+    def __get_stub_path(self, name: str) -> Path:
+        """Get stub file path"""
         if Path(self.stubs[name]).exists():
-            return self.stubs[name]
+            return Path(self.stubs[name])
         path = Path(self.path["stubs"], self.stubs[name])
         if path.exists():
             return path
-        raise Exception("Stub fayil mavjud emas")
+        raise FileNotFoundError("Stub file does not exist")
 
-    def _read_stub(self, name: Union[str], append: Union[bool] = False) -> str:
-        """Get stub"""
+    def _read_stub(self, name: str, append: bool = False) -> str:
+        """Get stub content"""
         response = ""
         top_content = ""
         with open(self.__get_stub_path(name)) as file:
@@ -98,15 +97,15 @@ class Generate:
             response = "\n" + response
         return top_content, response
 
-    def _get_module_name(self, prefix: Union[str] = ""):
-        return f"{str(self.name).capitalize()}{prefix}"
+    def _get_module_name(self, prefix: str = "") -> str:
+        return f"{self.name.capitalize()}{prefix}"
 
     def _write_file(
         self,
-        file_path: Union[str],
-        stub: Union[str],
-        prefix: Union[str] = "",
-        append: Union[bool] = False,
+        file_path: str,
+        stub: str,
+        prefix: str = "",
+        append: bool = False,
     ):
         if not os.path.exists(file_path):
             open(file_path, "w").close()
@@ -114,30 +113,29 @@ class Generate:
             file_content = file.read()
             top_content, content = self._read_stub(stub, append=append)
             file.seek(0)
-            file.write(top_content.format(name_cap=self.name.capitalize(), file_name=self.file_name))
+            file.write(top_content % {"name_cap": self.name.capitalize(), "file_name": self.file_name})
             file.write(file_content)
             file.write(
-                content.format(
-                    class_name=self._get_module_name(prefix),
-                    name=self.name,
-                    name_cap=self.name.capitalize(),
-                )
+                content
+                % {
+                    "class_name": self._get_module_name(prefix),
+                    "name": self.name,
+                    "name_cap": self.name.capitalize(),
+                }
             )
 
-    def _import_init(self, init_path: Union[str], file_name: Union[str]):
-        """__init__.py fayliga kerakli fayillarni import qiladi mavjud bo'lmasa yaratadi"""
+    def _import_init(self, init_path: str, file_name: str):
+        """Import necessary files into __init__.py, create if not exists"""
         with open(init_path, "a") as file:
-            file.write(self._read_stub("init")[1].format(file_name=file_name))
+            file.write(self._read_stub("init")[1] % {"file_name": file_name})
         Code.format_code(init_path)
 
-    def _get_file_name(self, module: Union[str], name: Union[str]) -> str:
-        """Fayl nomini olish"""
-        if module == "test":
-            return f"test_{name}.py"
-        return f"{name}.py"
+    def _get_file_name(self, module: str, name: str) -> str:
+        """Get file name"""
+        return f"test_{name}.py" if module == "test" else f"{name}.py"
 
-    def make_folders(self, app: Union[str], modules: Union[List[str]]) -> bool:
-        """Agar kerakli papkalar topilmasa yaratadi"""
+    def make_folders(self, app: str, modules: List[str]) -> bool:
+        """Create necessary folders if not found"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
             module_dir = join(apps_dir, self.path[module])
@@ -158,10 +156,10 @@ class Generate:
         return True
 
     def run(self) -> None:
-        """Ishga tushurish uchun"""
+        """Run the generator"""
         self.file_name = questionary.text("File Name: ").ask()
         self.name = questionary.text("Name: ").ask()
 
-        app = questionary.select("Appni tanlang", choices=list(self._get_apps())).ask()
-        modules = questionary.checkbox("Kerakli modullarni tanlang", self.modules).ask()
+        app = questionary.select("Select App", choices=list(self._get_apps())).ask()
+        modules = questionary.checkbox("Select required modules", self.modules).ask()
         self.make_folders(app, modules)

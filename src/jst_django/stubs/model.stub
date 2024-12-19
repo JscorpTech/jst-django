@@ -3,13 +3,13 @@
 ##from django.utils.translation import gettext_lazy as _
 ##
 
-class {class_name}(AbstractBaseModel):
+class %(class_name)s(AbstractBaseModel):
     name = ...
 
     def __str__(self):
         return self.name
 
     class Meta:
-        db_table = "{name}"
-        verbose_name = _("{class_name}")
-        verbose_name_plural = _("{class_name}s")
+        db_table = "%(name)s"
+        verbose_name = _("%(class_name)s")
+        verbose_name_plural = _("%(class_name)ss")

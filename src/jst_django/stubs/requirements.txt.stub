@@ -3,3 +3,4 @@ django
 django-unfold
 django-modeltranslation
 drf-spectacular
+jst-django-core~=1.0.8

@@ -1,5 +1,5 @@
-!!from ..models import {name_cap}Model
-!!from ..serializers.{file_name} import Retrieve{name_cap}Serializer, List{name_cap}Serializer, Create{name_cap}Serializer  
+!!from ..models import %(name_cap)sModel
+!!from ..serializers.%(file_name)s import Retrieve%(name_cap)sSerializer, List%(name_cap)sSerializer, Create%(name_cap)sSerializer  
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
 ##from typing import Any
 ##from rest_framework.permissions import AllowAny
@@ -7,20 +7,20 @@
 ##from django_core.mixins import BaseViewSetMixin
 ##
 
-@extend_schema(tags=["{name}"])
-class {class_name}(BaseViewSetMixin, ReadOnlyModelViewSet):
-    queryset = {name_cap}Model.objects.all()
+@extend_schema(tags=["%(name)s"])
+class %(class_name)s(BaseViewSetMixin, ReadOnlyModelViewSet):
+    queryset = %(name_cap)sModel.objects.all()
 
     def get_serializer_class(self) -> Any:
         match self.action:
             case "list":
-                return List{name_cap}Serializer
+                return List%(name_cap)sSerializer
             case "retrieve":
-                return Retrieve{name_cap}Serializer
+                return Retrieve%(name_cap)sSerializer
             case "create":
-                return Create{name_cap}Serializer
+                return Create%(name_cap)sSerializer
             case _:
-                return List{name_cap}Serializer
+                return List%(name_cap)sSerializer
 
     def get_permissions(self) -> Any:
         perms = []

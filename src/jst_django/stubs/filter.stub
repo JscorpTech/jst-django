@@ -1,10 +1,10 @@
 ##from django_filters import rest_framework as filters
-##from ..models import {name_cap}Model
+##from ..models import %(name_cap)sModel
 ##
 
-class {class_name}(filters.FilterSet):
+class %(class_name)s(filters.FilterSet):
     name = filters.CharFilter(field_name="name", lookup_expr="icontains")
 
     class Meta:
-        model = {name_cap}Model
+        model = %(name_cap)sModel
         fields = ("name",)
