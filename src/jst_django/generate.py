@@ -130,12 +130,18 @@ class Generate:
             file.write(self._read_stub("init")[1].format(file_name=file_name))
         Code.format_code(init_path)
 
+    def _get_file_name(self, module: Union[str], name: Union[str]) -> str:
+        """Fayl nomini olish"""
+        if module == "test":
+            return f"test_{name}.py"
+        return f"{name}.py"
+
     def make_folders(self, app: Union[str], modules: Union[List[str]]) -> bool:
         """Agar kerakli papkalar topilmasa yaratadi"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
             module_dir = join(apps_dir, self.path[module])
-            file_path = join(module_dir, f"{self.file_name}.py")
+            file_path = join(module_dir, self._get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
             File.mkdir(module_dir)
             if module == "serializer":
