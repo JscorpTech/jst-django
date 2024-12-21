@@ -14,7 +14,9 @@ class Jst:
                 "apps": "./",
                 "locale": "./locale/",
             },
-            "stubs": {},
+            "stubs": {
+                "admin": "django/admin.stub",
+            },
         }
 
     def _check_config(self) -> Union[bool]:

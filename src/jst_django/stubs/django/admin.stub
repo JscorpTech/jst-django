@@ -1,0 +1,7 @@
+!!from ..models import %(name_cap)sModel
+##from django.contrib import admin
+##
+
+@admin.register(%(name_cap)sModel)
+class %(class_name)s(admin.ModelAdmin):
+    list_display = ("id", "__str__",)

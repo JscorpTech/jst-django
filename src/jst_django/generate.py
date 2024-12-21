@@ -130,9 +130,10 @@ class Generate:
             file.write(self._read_stub("init")[1] % {"file_name": file_name})
         Code.format_code(init_path)
 
-    def _get_file_name(self, module: str, name: str) -> str:
+    def _get_file_name(self, module: str, name: str, extension: bool = True) -> str:
         """Get file name"""
-        return f"test_{name}.py" if module == "test" else f"{name}.py"
+        extension = ".py" if extension else ""
+        return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
 
     def make_folders(self, app: str, modules: List[str]) -> bool:
         """Create necessary folders if not found"""
@@ -148,7 +149,7 @@ class Generate:
                 File.mkdir(module_dir)
                 self._import_init(join(module_dir, "__init__.py"), file_name=self.name)
             if not os.path.exists(file_path):
-                self._import_init(init_path, self.file_name)
+                self._import_init(init_path, self._get_file_name(module, self.file_name, extension=False))
                 self._write_file(file_path, module, module.capitalize())
             else:
                 self._write_file(file_path, module, module.capitalize(), append=True)
