@@ -1,20 +1,22 @@
-### from django.urls import reverse
-### from rest_framework.test import APIClient
+!!from ..models import %(name_cap)sModel
 ##from django.test import TestCase
+##from django.urls import reverse
+##from rest_framework.test import APIClient
 
 
-class %(class_name)sTest(TestCase):
+class %(class_name)s(TestCase):
 
-    # def setUp(self):
-    #    self.client = APIClient()
-    #    self.urls = {
-    #        "list": reverse("list"),
-    #        "retrieve": reverse("detail", kwargs={"pk": 1}),
-    #        "create": reverse("create"),
-    #        "update": reverse("update", kwargs={"pk": 1}),
-    #        "partial_update": reverse("partial-update", kwargs={"pk": 1}),
-    #        "destroy": reverse("destroy", kwargs={"pk": 1}),
-    #    }
+    def _create_data(self):
+        return %(name_cap)sModel._create_face()
+
+    def setUp(self):
+        self.client = APIClient()
+        self.instance = self._create_data()
+        self.urls = {
+            "list": reverse("%(name)s-list"),
+            "retrieve": reverse("%(name)s-detail", kwargs={"pk": self.instance.pk}),
+            "retrieve-not-found": reverse("%(name)s-detail", kwargs={"pk": 1000}),
+        }
 
     def test_create(self):
         self.assertTrue(True)
@@ -28,10 +30,17 @@ class %(class_name)sTest(TestCase):
     def test_destroy(self):
         self.assertTrue(True)
 
-    # def test_list(self):
-    #    response = self.client.get(self.urls["list"])
-    #    self.assertEqual(response.status_code, 200)
+    def test_list(self):
+        response = self.client.get(self.urls["list"])
+        self.assertTrue(response.json()["status"])
+        self.assertEqual(response.status_code, 200)
 
-    # def test_retrieve(self):
-    #    response = self.client.get(self.urls["retrieve"])
-    #    self.assertEqual(response.status_code, 200)
+    def test_retrieve(self):
+        response = self.client.get(self.urls["retrieve"])
+        self.assertTrue(response.json()["status"])
+        self.assertEqual(response.status_code, 200)
+    
+    def test_retrieve_not_found(self):
+        response = self.client.get(self.urls["retrieve-not-found"])
+        self.assertFalse(response.json()["status"])
+        self.assertEqual(response.status_code, 404)
