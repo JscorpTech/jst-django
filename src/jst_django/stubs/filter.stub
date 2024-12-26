@@ -1,5 +1,5 @@
+!!from ..models import %(name_cap)sModel
 ##from django_filters import rest_framework as filters
-##from ..models import %(name_cap)sModel
 ##
 
 class %(class_name)s(filters.FilterSet):

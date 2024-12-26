@@ -135,7 +135,7 @@ class Generate:
         extension = ".py" if extension else ""
         return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
 
-    def make_folders(self, app: str, modules: List[str]) -> bool:
+    def _generate_files(self, app: str, modules: List[str]) -> bool:
         """Create necessary folders if not found"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
@@ -159,8 +159,13 @@ class Generate:
     def run(self) -> None:
         """Run the generator"""
         self.file_name = questionary.text("File Name: ").ask()
-        self.name = questionary.text("Name: ").ask()
-
+        names = questionary.text("Name: ", multiline=True).ask().split("\n")
+        if len(names) == 0:
+            raise Exception("Name can not be empty")
         app = questionary.select("Select App", choices=list(self._get_apps())).ask()
         modules = questionary.checkbox("Select required modules", self.modules).ask()
-        self.make_folders(app, modules)
+        for name in names:
+            if len(name) == 0:
+                continue
+            self.name = name
+            self._generate_files(app, modules)

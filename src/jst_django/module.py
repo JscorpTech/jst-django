@@ -65,11 +65,12 @@ class Module:
                 file.write(data.replace("{{module_name}}", "%s%s" % (self.config.get("apps", ""), module_name)))
                 file.truncate()
 
-    def run(self, module_name, version=None):
+    def run(self, module_name: str, version=None):
         module = questionary.select("Modulni tanlang", choices=self.modules.keys()).ask()
         api = Github("module-%s" % module)
         if module_name is None:
             module_name = module
+        modules = module_name.split(",")
         if version is None:
             version = api.latest_release()
         else:
@@ -77,5 +78,10 @@ class Module:
         print("[bold red]version: %s[/bold red]" % version)
         module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
 
-        self._download_and_extract_module(module_name, module)
-        print("[bold green]Modul o'rnatish yakunlandi[/bold green]")
+        for module_name in modules:
+            module_name = module_name.strip()
+            if len(module_name) == 0:
+                continue
+            print("[bold green]Modul o'rnatish boshlandi: %s[/bold green]" % module_name)
+            self._download_and_extract_module(module_name, module)
+            print("[bold green]Modul o'rnatish yakunlandi: %s[/bold green]" % module_name)
