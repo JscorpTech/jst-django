@@ -10,7 +10,7 @@ class %(class_name)s(AbstractBaseModel):
         return self.name
 
     @classmethod
-    def _create_face(self):
+    def _create_fake(self):
         return self.objects.create(
             name="Test",
         )
