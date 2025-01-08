@@ -1,4 +1,4 @@
-from typing import List, Union, Optional, Generator
+from typing import List, Optional, Generator
 import os
 import questionary
 from .utils import File, Code, Jst

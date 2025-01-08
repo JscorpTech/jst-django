@@ -7,7 +7,7 @@
 class %(class_name)s(TestCase):
 
     def _create_data(self):
-        return %(name_cap)sModel._create_face()
+        return %(name_cap)sModel._create_fake()
 
     def setUp(self):
         self.client = APIClient()
