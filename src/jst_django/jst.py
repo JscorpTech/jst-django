@@ -41,6 +41,8 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         "rosetta",
         "channels",
         "ckeditor",
+        "modeltranslation",
+        "parler",
     ]
     questions = {
         "project_name": {"type": "text", "message": "Project name: ", "default": "django"},
