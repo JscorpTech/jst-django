@@ -10,22 +10,12 @@
 @extend_schema(tags=["%(name)s"])
 class %(class_name)s(BaseViewSetMixin, ReadOnlyModelViewSet):
     queryset = %(name_cap)sModel.objects.all()
+    serializer_class = List%(name_cap)sSerializer
+    permission_classes = [AllowAny]
 
-    def get_serializer_class(self) -> Any:
-        match self.action:
-            case "list":
-                return List%(name_cap)sSerializer
-            case "retrieve":
-                return Retrieve%(name_cap)sSerializer
-            case "create":
-                return Create%(name_cap)sSerializer
-            case _:
-                return List%(name_cap)sSerializer
-
-    def get_permissions(self) -> Any:
-        perms = []
-        match self.action:
-            case _:
-                perms.extend([AllowAny])
-        self.permission_classes = perms
-        return super().get_permissions()
+    action_permission_classes = {}
+    action_serializer_class = {
+        "list": List%(name_cap)sSerializer,
+        "retrieve": Retrieve%(name_cap)sSerializer,
+        "create": Create%(name_cap)sSerializer,
+    }
