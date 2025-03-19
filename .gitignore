@@ -11,3 +11,5 @@ test.py
 resources/
 .idea/
 .vscode/
+src/jst_django/jst.build
+src/jst_django/jst.dist
