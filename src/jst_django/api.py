@@ -11,6 +11,7 @@ class Github:
             "list": "releases",
             "latest": "releases/latest",
             "detail": "releases/tags/{}",
+            "ref": "git/refs/tags/{}",
         }
 
     def request(self, action):
@@ -30,6 +31,9 @@ class Github:
     def latest_release(self) -> Union[str]:
         """Oxirgi release"""
         return self.request(self.relase_urls["latest"])["name"]
+
+    def get_commit_id(self, version) -> str:
+        return self.request(self.relase_urls["ref"].format(version))["object"]["sha"]
 
     def check_version(self, version: Union[str], versions: Union[List[str]]):
         """Versionni tekshirish"""

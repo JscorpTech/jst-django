@@ -1,4 +1,4 @@
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, Dict, Any, LiteralString
 import os
 import questionary
 from .utils import File, Code, Jst
@@ -6,9 +6,25 @@ from pathlib import Path
 from os.path import join
 
 
+def directory_ls(path: str) -> Generator[Path, None, None]:
+    """Directory items list"""
+    ignore = ["logs"]
+    for item in Path(path).iterdir():
+        if item.name not in ignore and item.is_dir():
+            yield item
+
+
+def get_file_name(module: str, name: str, extension: bool = True) -> str:
+    """Get file name"""
+    extension = ".py" if extension else ""
+    return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
+
+
 class Generate:
     name: Optional[str] = None
     file_name: Optional[str] = None
+    modules: List[str]
+    stubs: Dict[str, str]
 
     def __init__(self) -> None:
         self.config = Jst().load_config()
@@ -56,16 +72,9 @@ class Generate:
             "signal": "signal.stub",
         } | self.config.get("stubs", {})
 
-    def _directory_ls(self, path: str) -> Generator[Path, None, None]:
-        """Directory items list"""
-        ignore = ["logs"]
-        for item in Path(path).iterdir():
-            if item.name not in ignore and item.is_dir():
-                yield item
-
     def _get_apps(self) -> Generator[str, None, None]:
         """Return list of Django apps"""
-        dirs = self._directory_ls(self.path["apps"])
+        dirs = directory_ls(self.path["apps"])
         for item in dirs:
             if item.joinpath("apps.py").exists():
                 yield item.name
@@ -79,7 +88,7 @@ class Generate:
             return path
         raise FileNotFoundError("Stub file does not exist")
 
-    def _read_stub(self, name: str, append: bool = False) -> str:
+    def _read_stub(self, name: str, append: bool = False) -> tuple[str | Any, LiteralString | str | Any]:
         """Get stub content"""
         response = ""
         top_content = ""
@@ -130,17 +139,12 @@ class Generate:
             file.write(self._read_stub("init")[1] % {"file_name": file_name})
         Code.format_code(init_path)
 
-    def _get_file_name(self, module: str, name: str, extension: bool = True) -> str:
-        """Get file name"""
-        extension = ".py" if extension else ""
-        return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
-
     def _generate_files(self, app: str, modules: List[str]) -> bool:
         """Create necessary folders if not found"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
             module_dir = join(apps_dir, self.path[module])
-            file_path = join(module_dir, self._get_file_name(module, self.file_name))
+            file_path = join(module_dir, get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
             File.mkdir(module_dir)
             if module == "serializer":
@@ -149,7 +153,7 @@ class Generate:
                 File.mkdir(module_dir)
                 self._import_init(join(module_dir, "__init__.py"), file_name=self.name)
             if not os.path.exists(file_path):
-                self._import_init(init_path, self._get_file_name(module, self.file_name, extension=False))
+                self._import_init(init_path, get_file_name(module, self.file_name, extension=False))
                 self._write_file(file_path, module, module.capitalize())
             else:
                 self._write_file(file_path, module, module.capitalize(), append=True)

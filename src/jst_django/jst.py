@@ -11,6 +11,7 @@ from .api import Github
 from .translate import Translate
 from .module import Module
 from jst_aicommit.main import JstAiCommit
+import json
 
 app = typer.Typer()
 
@@ -85,12 +86,22 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         **{choice: choice in packages for choice in choices},
         **answers,
     }
+
+    cruft_config = {
+        "template": template,
+        "commit": Github().get_commit_id(version),
+        "checkout": None,
+        "context": {"cookiecutter": context},
+        "directory": None,
+    }
     cookiecutter(
         template,
         checkout=version,
         no_input=True,
         extra_context=context,
     )
+    with open(f"{answers['project_slug']}/.cruft.json", "w") as file:
+        file.write(json.dumps(cruft_config, indent=True))
 
 
 @app.command(name="generate", help="Compoment generatsiya qilish")
