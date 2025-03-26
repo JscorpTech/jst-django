@@ -1,7 +1,6 @@
 !!from ..models import %(name_cap)sModel
 !!from ..serializers.%(file_name)s import Retrieve%(name_cap)sSerializer, List%(name_cap)sSerializer, Create%(name_cap)sSerializer  
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
-##from typing import Any
 ##from rest_framework.permissions import AllowAny
 ##from drf_spectacular.utils import extend_schema
 ##from django_core.mixins import BaseViewSetMixin
