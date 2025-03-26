@@ -5,7 +5,11 @@ from polib import pofile
 from tqdm import tqdm
 import questionary
 import os
-from .utils import Jst
+from .utils import Jst, cancel
+from rich.console import Console
+import time
+
+console = Console()
 
 
 class Translate:
@@ -27,6 +31,7 @@ class Translate:
         headers = {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "uz,en-US;q=0.9,en;q=0.8,ru;q=0.7",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1OTY5MTksImlhdCI6MTc0Mjk5MjExOSwic3ViIjoiMzA0OGY1YzUtMmQzNi00NzFmLTk3YmEtZjNhMTlkYWE5ZTYxIiwidHNpZCI6IiIsInR5cGUiOi0xfQ.mw8XwCf2RTdhCsna2nFMTrcxKI8ImpsS8vAejjBHFKA",
             "Connection": "keep-alive",
             "Content-Type": "application/json",
             "Origin": "https://tahrirchi.uz",
@@ -64,18 +69,50 @@ class Translate:
         file = questionary.select(
             "Fayil joylashgan papkani tanlang: %s" % self.config["dirs"]["locale"], choices=pofiles
         ).ask()
-        source = questionary.select("Hozirli fayil tilini tanlang: ", choices=self.langs).ask()
+        if file is None:
+            return cancel()
+
+        source = questionary.select("Hozirgi fayil tilini tanlang: ", choices=self.langs).ask()
+        if source is None:
+            return cancel()
+
         target = questionary.select("Tarjima qilish kerak bo'lgan til: ", choices=self.langs).ask()
+        if target is None:
+            return cancel()
+
         self.get_messages(
             os.path.join(os.getcwd(), "{}/{}/LC_MESSAGES/django.po".format(self.config["dirs"]["locale"], file))
         )
-        progress = tqdm(total=len(self.messages))
+
+        progress = tqdm(total=len(self.messages), dynamic_ncols=True, position=0)
+        logs = []  # Oxirgi 10 ta logni saqlash uchun ro'yxat
+
         for index, message in enumerate(self.messages):
-            if message.msgstr != "":
-                continue
-            message.msgstr = self.translate(message.msgid, source, target)[1]
-            progress.update(1)
+            if message.msgstr.strip() != "":
+                time.sleep(0.01)
+                progress.update(1)
+                logs.append(
+                    f"\033[90m{message.msgid[:50]}\033[0m → \033[90m{message.msgstr[:50]}\033[0m"
+                )  # Cyan va Green
+            else:
+                progress.update(1)
+                message.msgstr = self.translate(message.msgid, source, target)[1]
+                logs.append(
+                    f"\033[36m{message.msgid[:50]}\033[0m → \033[32m{message.msgstr[:50]}\033[0m"
+                )  # Cyan va Green
+
+            # Loglarni yangilash
+            if len(logs) > 5:
+                logs.pop(0)
+
+            # Terminalni tozalamasdan faqat oxirgi 10 ta logni o‘zgartiramiz
+            tqdm.write("\n".join(logs))
+            tqdm.write("\033[%sA" % len(logs), end="")
+
             if index % 10 == 0:
                 self.messages.save()
+
         self.messages.save()
+        progress.close()
+
         logging.info("Tarjima qilish yakunlandi!!!")
