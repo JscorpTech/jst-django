@@ -6,7 +6,7 @@ from cookiecutter.main import cookiecutter
 import questionary
 from typing import Annotated
 from .generate import Generate
-from .utils import Jst, get_progress
+from .utils import Jst, get_progress, cancel
 from .api import Github
 from .translate import Translate
 from .module import Module
@@ -25,14 +25,10 @@ def install_module(
     Module().run(module_name, version)
 
 
-def cancel():
-    print("[bold red]Progress canceled![/bold red]")
-
-
 @app.command(name="create", help="Yangi loyiha yaratish")
 def create_project(version: str = typer.Option(None, "--version", "-v")):
     with get_progress() as progress:
-        task1 = progress.add_task("[magenta]Fetch version")
+        task1 = progress.add_task("[cyan]Fetch version")
         if version is None:
             version = Github().latest_release()
             print("version: ", version)

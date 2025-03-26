@@ -1,7 +1,7 @@
 from typing import List, Optional, Generator, Dict, Any, LiteralString
 import os
 import questionary
-from .utils import File, Code, Jst
+from .utils import File, Code, Jst, cancel
 from pathlib import Path
 from os.path import join
 
@@ -162,12 +162,21 @@ class Generate:
 
     def run(self) -> None:
         """Run the generator"""
-        self.file_name = questionary.text("File Name: ").ask()
-        names = questionary.text("Name: ", multiline=True).ask().split("\n")
+        self.file_name = questionary.text("File Name: ", validate=lambda x: True if len(x) > 0 else False).ask()
+        if self.file_name is None:
+            return cancel()
+        names = questionary.text("Name: ", multiline=True, validate=lambda x: True if len(x) > 0 else False).ask()
+        if names is None:
+            return cancel()
+        names = names.split("\n")
         if len(names) == 0:
             raise Exception("Name can not be empty")
         app = questionary.select("Select App", choices=list(self._get_apps())).ask()
+        if app is None:
+            return cancel()
         modules = questionary.checkbox("Select required modules", self.modules).ask()
+        if modules is None:
+            return cancel()
         for name in names:
             if len(name) == 0:
                 continue

@@ -7,8 +7,7 @@ import questionary
 import shutil
 from uuid import uuid4
 from typing import Union
-from .utils import Jst
-from rich import print
+from .utils import Jst, get_progress, cancel
 
 
 def subfolder_to_parent(path):
@@ -69,21 +68,29 @@ class Module:
 
     def run(self, module_name: str, version=None):
         module = questionary.select("Modulni tanlang", choices=self.modules.keys()).ask()
-        api = Github("module-%s" % module)
-        if module_name is None:
-            module_name = module
-        modules = module_name.split(",")
-        if version is None:
-            version = api.latest_release()
-        else:
-            api.releases(version)
-        print("[bold red]version: %s[/bold red]" % version)
-        module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
+        if module is None:
+            return cancel()
+        with get_progress() as progress:
+            task1 = progress.add_task("[cyan]Fetch module")
+            task2 = progress.add_task("[magenta]Install module")
+            api = Github("module-%s" % module)
+            if module_name is None:
+                module_name = module
+            modules = module_name.split(",")
+            if version is None:
+                version = api.latest_release()
+            else:
+                api.releases(version)
+            progress.update(task1, description="[green]√ Done Fetch module version: %s" % version)
+            module = "https://github.com/JscorpTech/module-{}/archive/refs/tags/{}.zip".format(module, version)
 
-        for module_name in modules:
-            module_name = module_name.strip()
-            if len(module_name) == 0:
-                continue
-            print("[bold green]Modul o'rnatish boshlandi: %s[/bold green]" % module_name)
-            self._download_and_extract_module(module_name, module)
-            print("[bold green]Modul o'rnatish yakunlandi: %s[/bold green]" % module_name)
+            for module_name in modules:
+                module_name = module_name.strip()
+                if len(module_name) == 0:
+                    continue
+                progress.update(task2, description="[cyan]Installing module: %s" % module_name)
+                try:
+                    self._download_and_extract_module(module_name, module)
+                    progress.update(task2, description="[green]I√ Done Installed module: %s" % module_name)
+                except Exception as e:
+                    progress.update(task2, description="[red]Installing error: %s" % str(e))
