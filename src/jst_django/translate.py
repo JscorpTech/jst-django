@@ -14,6 +14,7 @@ console = Console()
 
 class Translate:
     messages = None
+    _token = None
 
     def __init__(self) -> None:
         self.langs: Union[List] = [
@@ -24,6 +25,18 @@ class Translate:
         ]
         self.config = Jst().load_config()
 
+    @property
+    def token(self) -> str:
+        if self._token is not None:
+            return self._token
+        auth = "https://auth.tahrirchi.uz/v1/guest"
+        response = requests.post(auth, data={})
+        token = response.json().get("data").get("access_token")
+        self._token = token
+        if token is None:
+            raise Exception("Token olishda xatolik yuz berdi")
+        return token
+
     def translate(self, message, source, target) -> Union[Tuple]:
         url = "https://websocket.tahrirchi.uz/handle-batch"
 
@@ -31,7 +44,7 @@ class Translate:
         headers = {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "uz,en-US;q=0.9,en;q=0.8,ru;q=0.7",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1OTY5MTksImlhdCI6MTc0Mjk5MjExOSwic3ViIjoiMzA0OGY1YzUtMmQzNi00NzFmLTk3YmEtZjNhMTlkYWE5ZTYxIiwidHNpZCI6IiIsInR5cGUiOi0xfQ.mw8XwCf2RTdhCsna2nFMTrcxKI8ImpsS8vAejjBHFKA",
+            "Authorization": "Bearer " + self.token,
             "Connection": "keep-alive",
             "Content-Type": "application/json",
             "Origin": "https://tahrirchi.uz",
