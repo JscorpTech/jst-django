@@ -6,7 +6,7 @@ from cookiecutter.main import cookiecutter
 import questionary
 from typing import Annotated
 from .generate import Generate
-from .utils import Jst
+from .utils import Jst, get_progress
 from .api import Github
 from .translate import Translate
 from .module import Module
@@ -25,14 +25,23 @@ def install_module(
     Module().run(module_name, version)
 
 
+def cancel():
+    print("[bold red]Progress canceled![/bold red]")
+
+
 @app.command(name="create", help="Yangi loyiha yaratish")
 def create_project(version: str = typer.Option(None, "--version", "-v")):
-    if version is None:
-        version = Github().latest_release()
-        print("version: ", version)
-    else:
-        Github().releases(version)
+    with get_progress() as progress:
+        task1 = progress.add_task("[magenta]Fetch version")
+        if version is None:
+            version = Github().latest_release()
+            print("version: ", version)
+        else:
+            Github().releases(version)
+        progress.update(task1, description="[green]√ Done: Fetch version")
     template = questionary.text("Template: ", default="django").ask()
+    if template is None:
+        return cancel()
     if template == "django" or (template.startswith("http") is not True and not os.path.exists(template)):
         template = "https://github.com/JscorpTech/{}".format(template)
     choices = [
@@ -80,13 +89,14 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
     for key, value in questions.items():
         method = value.pop("type")
         answers[key] = getattr(questionary, method)(**value).ask()
+        if answers[key] is None:
+            return cancel()
     answers["project_slug"] = answers["project_name"].lower().replace(" ", "_").replace("-", "_").replace(".", "_")
     packages = answers.pop("packages")
     context = {
         **{choice: choice in packages for choice in choices},
         **answers,
     }
-
     cruft_config = {
         "template": template,
         "commit": Github().get_commit_id(version),
@@ -94,14 +104,19 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         "context": {"cookiecutter": context},
         "directory": None,
     }
-    cookiecutter(
-        template,
-        checkout=version,
-        no_input=True,
-        extra_context=context,
-    )
-    with open(f"{answers['project_slug']}/.cruft.json", "w") as file:
-        file.write(json.dumps(cruft_config, indent=True))
+    with get_progress() as progress:
+        task1 = progress.add_task("[magenta]Creating project")
+        task2 = progress.add_task("[magenta]Creating cruft config")
+        cookiecutter(
+            template,
+            checkout=version,
+            no_input=True,
+            extra_context=context,
+        )
+        progress.update(task1, description="[green]√ Done Created project")
+        with open(f"{answers['project_slug']}/.cruft.json", "w") as file:
+            file.write(json.dumps(cruft_config, indent=True))
+        progress.update(task2, description="[green]√ Done Created cruft config")
 
 
 @app.command(name="generate", help="Compoment generatsiya qilish")
