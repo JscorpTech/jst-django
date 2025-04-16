@@ -2,12 +2,15 @@ import zipfile
 import tempfile
 import requests
 import os
-from .api import Github
+from jst_django.utils.api import Github
 import questionary
 import shutil
 from uuid import uuid4
 from typing import Union
-from .utils import Jst, get_progress, cancel
+from jst_django.utils import Jst, get_progress, cancel
+import typer
+from typing import Annotated
+from jst_django.cli.app import app
 
 
 def subfolder_to_parent(path):
@@ -94,3 +97,10 @@ class Module:
                     progress.update(task2, description="[green]I√ Done Installed module: %s" % module_name)
                 except Exception as e:
                     progress.update(task2, description="[red]Installing error: %s" % str(e))
+
+
+@app.command(name="install", help="Modul o'rnatish")
+def install_module(
+    module_name: Annotated[str, typer.Argument()] = None, version: str = typer.Option(None, "--version", "-v")
+):
+    Module().run(module_name, version)

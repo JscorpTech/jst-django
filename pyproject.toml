@@ -52,7 +52,7 @@ jst-aicommit = "^1.2"
 isort = "^5.13.2"
 
 [tool.poetry.scripts]
-jst = 'jst_django.jst:app'
+jst = 'jst_django.cli.main:app'
 
 [tool.black]
 line-length = 120

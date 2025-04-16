@@ -1,13 +1,14 @@
 from typing import Union, List, Tuple, Any
 import requests
-from .logger import logging
+from jst_django.utils.logger import logging
 from polib import pofile
 from tqdm import tqdm
 import questionary
 import os
-from .utils import Jst, cancel
+from jst_django.utils import Jst, cancel
 from rich.console import Console
 import time
+from jst_django.cli.app import app
 
 console = Console()
 
@@ -129,3 +130,8 @@ class Translate:
         progress.close()
 
         logging.info("Tarjima qilish yakunlandi!!!")
+
+
+@app.command(name="translate", help="Avtomatik tarjima")
+def translate():
+    Translate().run()

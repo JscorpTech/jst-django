@@ -1,23 +1,10 @@
 from typing import List, Optional, Generator, Dict, Any, LiteralString
 import os
 import questionary
-from .utils import File, Code, Jst, cancel
+from jst_django.utils import File, Code, Jst, cancel
 from pathlib import Path
 from os.path import join
-
-
-def directory_ls(path: str) -> Generator[Path, None, None]:
-    """Directory items list"""
-    ignore = ["logs"]
-    for item in Path(path).iterdir():
-        if item.name not in ignore and item.is_dir():
-            yield item
-
-
-def get_file_name(module: str, name: str, extension: bool = True) -> str:
-    """Get file name"""
-    extension = ".py" if extension else ""
-    return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
+from jst_django.cli.app import app
 
 
 class Generate:
@@ -182,3 +169,22 @@ class Generate:
                 continue
             self.name = name
             self._generate_files(app, modules)
+
+
+def directory_ls(path: str) -> Generator[Path, None, None]:
+    """Directory items list"""
+    ignore = ["logs"]
+    for item in Path(path).iterdir():
+        if item.name not in ignore and item.is_dir():
+            yield item
+
+
+def get_file_name(module: str, name: str, extension: bool = True) -> str:
+    """Get file name"""
+    extension = ".py" if extension else ""
+    return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
+
+
+@app.command(name="generate", help="Compoment generatsiya qilish")
+def generate():
+    Generate().run()
