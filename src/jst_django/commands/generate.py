@@ -5,6 +5,7 @@ from jst_django.utils import File, Code, Jst, cancel
 from pathlib import Path
 from os.path import join
 from jst_django.cli.app import app
+import typer
 
 
 class Generate:
@@ -12,6 +13,8 @@ class Generate:
     file_name: Optional[str] = None
     modules: List[str]
     stubs: Dict[str, str]
+    sub_folder: Optional[str] = None
+    selected_modules: Optional[list] = None
 
     def __init__(self) -> None:
         self.config = Jst().load_config()
@@ -29,7 +32,7 @@ class Generate:
             "form": dirs.get("forms", "forms/"),
             "filter": dirs.get("filters", "filters/"),
             "signal": dirs.get("signals", "signals/"),
-            "stubs": join(os.path.dirname(__file__), "stubs"),
+            "stubs": join(os.path.dirname(__file__), "../stubs"),
         }
         self.modules = [
             "model",
@@ -73,7 +76,7 @@ class Generate:
         path = Path(self.path["stubs"], self.stubs[name])
         if path.exists():
             return path
-        raise FileNotFoundError("Stub file does not exist")
+        raise FileNotFoundError(f"Stub file does not exist {name}")
 
     def _read_stub(self, name: str, append: bool = False) -> tuple[str | Any, LiteralString | str | Any]:
         """Get stub content"""
@@ -95,6 +98,12 @@ class Generate:
 
     def _get_module_name(self, prefix: str = "") -> str:
         return f"{self.name.capitalize()}{prefix}"
+
+    def _get_module_path(self, module: str) -> str:
+        path = self.path[module]
+        if self.sub_folder is not None:
+            path = f"{path}{self.sub_folder}"
+        return path
 
     def _write_file(
         self,
@@ -130,7 +139,8 @@ class Generate:
         """Create necessary folders if not found"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
-            module_dir = join(apps_dir, self.path[module])
+            module_dir = join(apps_dir, self._get_module_path(module))
+            Path(module_dir).mkdir(parents=True, exist_ok=True)
             file_path = join(module_dir, get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
             File.mkdir(module_dir)
@@ -147,11 +157,31 @@ class Generate:
             Code.format_code(file_path)
         return True
 
+    def generate(module_path, modules):
+        parts = module_path.split("/")
+        if not len(parts) >= 3:
+            raise Exception("Model manzili to'g'ri kiritilmadi example: app_name.file_name.model_name")
+        app_name = parts[0]
+        path_parts = parts[1:-1]
+        name = path_parts.pop()
+        model_name = parts[-1]
+        path = "/".join(path_parts)
+        Path(path).mkdir(parents=True, exist_ok=True)
+        generate = Generate()
+        generate.sub_folder = path if len(path_parts) > 1 else None
+        generate.file_name = name
+        generate.name = model_name
+        generate._generate_files(app_name, modules)
+
     def run(self) -> None:
         """Run the generator"""
         self.file_name = questionary.text("File Name: ", validate=lambda x: True if len(x) > 0 else False).ask()
         if self.file_name is None:
             return cancel()
+        filename_parts = self.file_name.split("/")
+        if len(filename_parts) > 1:
+            self.file_name = filename_parts[-1]
+        self.sub_folder = "/".join(filename_parts[:-1])
         names = questionary.text("Name: ", multiline=True, validate=lambda x: True if len(x) > 0 else False).ask()
         if names is None:
             return cancel()
@@ -161,7 +191,10 @@ class Generate:
         app = questionary.select("Select App", choices=list(self._get_apps())).ask()
         if app is None:
             return cancel()
-        modules = questionary.checkbox("Select required modules", self.modules).ask()
+        if self.selected_modules is None:
+            modules = questionary.checkbox("Select required modules", self.modules).ask()
+        else:
+            modules = self.selected_modules
         if modules is None:
             return cancel()
         for name in names:
@@ -185,6 +218,23 @@ def get_file_name(module: str, name: str, extension: bool = True) -> str:
     return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
 
 
-@app.command(name="generate", help="Compoment generatsiya qilish")
+@app.command(name="make:modules", help="Compoment generatsiya qilish")
 def generate():
     Generate().run()
+
+
+@app.command(name="make:all", help="Compoment generatsiya qilish")
+def generate_all():
+    generate = Generate()
+    generate.selected_modules = generate.modules
+    generate.run()
+
+
+@app.command(name="make:model", help="generate model")
+def make_model(model_path: str = typer.Argument(..., help="Model path")):
+    Generate().generate(model_path, ["model"])
+
+
+@app.command(name="make:serializer", help="generate model")
+def make_serializer(model_path: str = typer.Argument(..., help="Model path")):
+    Generate().generate(model_path, ["serializer"])
