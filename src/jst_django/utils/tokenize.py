@@ -12,6 +12,16 @@ class Tokenize:
                 return f'models.TextField(verbose_name=_("{field}"))'
             case "int":
                 return f'models.IntegerField(verbose_name=_("{field}"))'
+            case "image":
+                return f'models.ImageField(verbose_name=_("{field}"), upload_to="{field}s")'
+            case "bool":
+                return f'models.BooleanField(verbose_name=_("{field}"))'
+            case "date":
+                return f'models.DateField(verbose_name=_("{field}"))'
+            case "time":
+                return f'models.TimeField(verbose_name=_("{field}"))'
+            case "datetime":
+                return f'models.DateTimeField(verbose_name=_("{field}"))'
             case _:
                 return f'models.CharField(verbose_name=_("{field}"), max_length=255)'
 
