@@ -25,6 +25,8 @@ MODULES = List[
     ]
 ]
 
+FIELDS = typer.Option(default="name:str", confirmation_prompt=True, help="name:type names[char,int,text,date,time,datetime,image,bool]")
+
 
 class Generate:
     modules: List[str]
@@ -37,7 +39,7 @@ class Generate:
         self.selected_modules: Optional[list] = None
         self.app = None
         self.module = None
-        self.fields: Tokenize
+        self.fields: Optional[Tokenize] = None
 
         self.config = Jst().load_config()
         dirs = self.config.get("dirs", {})
@@ -264,14 +266,16 @@ def get_file_name(module: str, name: str, extension: bool = True) -> str:
 
 
 @app.command(name="make:module", help="Compoment generatsiya qilish")
-def generate_module():
+def generate_module(fields:str = FIELDS):
     generate = Generate()
+    tokenize = Tokenize(fields.strip())
     generate.selected_modules = None
+    generate.fields = tokenize.make()
     generate.auto_generate()
 
 
 @app.command(name="make:crud", help="CRUD generatsiya qilish")
-def generate_crud(fields: str = typer.Option(default="name:str", confirmation_prompt=True, help="name:type names[char,int,text,date,time,datetime,image,bool]")):
+def generate_crud(fields: str = FIELDS):
     generate = Generate()
     tokenize = Tokenize(fields.strip())
     generate.selected_modules = generate.modules
