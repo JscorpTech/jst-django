@@ -3,7 +3,7 @@
 ##from django.utils.translation import gettext_lazy as _
 ##
 
-class %(class_name)s(AbstractBaseModel):
+class {{ class_name }}(AbstractBaseModel):
     name = models.CharField(_("name"), max_length=255)
 
     def __str__(self):
@@ -16,6 +16,6 @@ class %(class_name)s(AbstractBaseModel):
         )
 
     class Meta:
-        db_table = "%(name)s"
-        verbose_name = _("%(class_name)s")
-        verbose_name_plural = _("%(class_name)ss")
+        db_table = "{{ name }}"
+        verbose_name = _("{{ class_name }}")
+        verbose_name_plural = _("{{ class_name }}s")

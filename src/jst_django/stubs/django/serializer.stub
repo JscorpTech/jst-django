@@ -1,4 +1,4 @@
-!!from ...models import {name_cap}Model
+!!from {{ model_import_path }} import {name_cap}Model
 ##from rest_framework import serializers
 ##
 

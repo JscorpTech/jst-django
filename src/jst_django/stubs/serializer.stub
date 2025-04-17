@@ -1,23 +1,23 @@
-!!from ...models import %(name_cap)sModel
+!!from {{ model_import_path }} import {{ name_cap }}Model
 ##from rest_framework import serializers
 ##
 
-class Base%(class_name)s(serializers.ModelSerializer):
+class Base{{ class_name }}(serializers.ModelSerializer):
     class Meta:
-        model = %(name_cap)sModel
+        model = {{ name_cap }}Model
         exclude = [
             "created_at",
             "updated_at",
         ]
 
 
-class List%(class_name)s(Base%(class_name)s):
-    class Meta(Base%(class_name)s.Meta): ...
+class List{{ class_name }}(Base{{ class_name }}):
+    class Meta(Base{{ class_name }}.Meta): ...
 
 
-class Retrieve%(class_name)s(Base%(class_name)s):
-    class Meta(Base%(class_name)s.Meta): ...
+class Retrieve{{ class_name }}(Base{{ class_name }}):
+    class Meta(Base{{ class_name }}.Meta): ...
 
 
-class Create%(class_name)s(Base%(class_name)s):
-    class Meta(Base%(class_name)s.Meta): ...
+class Create{{ class_name }}(Base{{ class_name }}):
+    class Meta(Base{{ class_name }}.Meta): ...

@@ -1,21 +1,21 @@
-!!from ..models import %(name_cap)sModel
+!!from {{ model_import_path }} import {{ name_cap }}Model
 ##from django.test import TestCase
 ##from django.urls import reverse
 ##from rest_framework.test import APIClient
 
 
-class %(class_name)s(TestCase):
+class {{ class_name }}(TestCase):
 
     def _create_data(self):
-        return %(name_cap)sModel._create_fake()
+        return {{ name_cap }}Model._create_fake()
 
     def setUp(self):
         self.client = APIClient()
         self.instance = self._create_data()
         self.urls = {
-            "list": reverse("%(name)s-list"),
-            "retrieve": reverse("%(name)s-detail", kwargs={"pk": self.instance.pk}),
-            "retrieve-not-found": reverse("%(name)s-detail", kwargs={"pk": 1000}),
+            "list": reverse("{{ name }}-list"),
+            "retrieve": reverse("{{ name }}-detail", kwargs={"pk": self.instance.pk}),
+            "retrieve-not-found": reverse("{{ name }}-detail", kwargs={"pk": 1000}),
         }
 
     def test_create(self):

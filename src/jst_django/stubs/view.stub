@@ -1,20 +1,20 @@
-!!from ..models import %(name_cap)sModel
-!!from ..serializers.%(file_name)s import Retrieve%(name_cap)sSerializer, List%(name_cap)sSerializer, Create%(name_cap)sSerializer  
+!!from {{ model_import_path }} import {{ name_cap }}Model
+!!from {{ serializer_import_path }} import Retrieve{{ name_cap }}Serializer, List{{ name_cap }}Serializer, Create{{ name_cap }}Serializer  
 ##from rest_framework.viewsets import ReadOnlyModelViewSet
 ##from rest_framework.permissions import AllowAny
 ##from drf_spectacular.utils import extend_schema
 ##from django_core.mixins import BaseViewSetMixin
 ##
 
-@extend_schema(tags=["%(name)s"])
-class %(class_name)s(BaseViewSetMixin, ReadOnlyModelViewSet):
-    queryset = %(name_cap)sModel.objects.all()
-    serializer_class = List%(name_cap)sSerializer
+@extend_schema(tags=["{{ name }}"])
+class {{ class_name }}(BaseViewSetMixin, ReadOnlyModelViewSet):
+    queryset = {{ name_cap }}Model.objects.all()
+    serializer_class = List{{ name_cap }}Serializer
     permission_classes = [AllowAny]
 
     action_permission_classes = {}
     action_serializer_class = {
-        "list": List%(name_cap)sSerializer,
-        "retrieve": Retrieve%(name_cap)sSerializer,
-        "create": Create%(name_cap)sSerializer,
+        "list": List{{ name_cap }}Serializer,
+        "retrieve": Retrieve{{ name_cap }}Serializer,
+        "create": Create{{ name_cap }}Serializer,
     }

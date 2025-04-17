@@ -6,6 +6,7 @@ from pathlib import Path
 from os.path import join
 from jst_django.cli.app import app
 import typer
+import jinja2
 
 MODULES = List[
     Literal[
@@ -33,6 +34,8 @@ class Generate:
         self.file_name: Optional[str] = None
         self.sub_folder: Optional[str] = None
         self.selected_modules: Optional[list] = None
+        self.app = None
+        self.module = None
 
         self.config = Jst().load_config()
         dirs = self.config.get("dirs", {})
@@ -122,6 +125,12 @@ class Generate:
             path = f"{path}{self.sub_folder}"
         return path
 
+    def _get_import_path(self, path: str, sub: bool = False) -> str:
+        import_sub_path = "." + self.sub_folder.replace("/", ".") if self.sub_folder is not None else ""
+        if sub is True:
+            import_sub_path += f".{self.file_name}"
+        return f"core.apps.{self.app}.{path}{import_sub_path}"
+
     def _write_file(
         self,
         file_path: str,
@@ -129,27 +138,38 @@ class Generate:
         prefix: str = "",
         append: bool = False,
     ):
+        import_path = {
+            "model_import_path": self._get_import_path("models"),
+            "serializer_import_path": self._get_import_path("serializers", True),
+        }
         if not os.path.exists(file_path):
             open(file_path, "w").close()
         with open(file_path, "r+") as file:
             file_content = file.read()
             top_content, content = self._read_stub(stub, append=append)
             file.seek(0)
-            file.write(top_content % {"name_cap": self.name.capitalize(), "file_name": self.file_name})
+            file.write(
+                jinja2.Template(top_content + "\n").render(
+                    **{"name_cap": self.name.capitalize(), "file_name": self.file_name, **import_path}
+                )
+            )
             file.write(file_content)
             file.write(
-                content
-                % {
-                    "class_name": self._get_module_name(prefix),
-                    "name": self.name,
-                    "name_cap": self.name.capitalize(),
-                }
+                jinja2.Template(content).render(
+                    **{
+                        "class_name": self._get_module_name(prefix),
+                        "name": self.name,
+                        "name_cap": self.name.capitalize(),
+                        "file_name": self.file_name,
+                        **import_path,
+                    }
+                )
             )
 
     def _import_init(self, init_path: str, file_name: str):
         """Import necessary files into __init__.py, create if not exists"""
         with open(init_path, "a") as file:
-            file.write(self._read_stub("init")[1] % {"file_name": file_name})
+            file.write(jinja2.Template(self._read_stub("init")[1]).render(file_name=file_name))
         Code.format_code(init_path)
 
     def _generate_files(self, app: str, modules: MODULES) -> bool:
@@ -157,6 +177,7 @@ class Generate:
         apps_dir = join(self.path["apps"], app)
         for module in modules:
             module_dir = join(apps_dir, self._get_module_path(module))
+            self.module = module
             Path(module_dir).mkdir(parents=True, exist_ok=True)
             file_path = join(module_dir, get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
@@ -178,6 +199,7 @@ class Generate:
         if not len(parts) >= 3:
             raise Exception("Model manzili to'g'ri kiritilmadi example: app_name.file_name.model_name")
         app_name = parts[0]
+        self.app = app_name
         path_parts = parts[1:-1]
         name = path_parts.pop()
         model_name = parts[-1]
@@ -197,7 +219,7 @@ class Generate:
         filename_parts = self.file_name.split("/")
         if len(filename_parts) > 1:
             self.file_name = filename_parts[-1]
-        self.sub_folder = "/".join(filename_parts[:-1])
+        self.sub_folder = "/".join(filename_parts[:-1]) if len(filename_parts) > 1 else None
         names = questionary.text("Name: ", multiline=True, validate=lambda x: True if len(x) > 0 else False).ask()
         if names is None:
             return cancel()
@@ -207,6 +229,7 @@ class Generate:
         app = questionary.select("Select App", choices=list(self._get_apps())).ask()
         if app is None:
             return cancel()
+        self.app = app
         if self.selected_modules is None:
             modules = questionary.checkbox("Select required modules", choices=self.modules).ask()
         else:
@@ -237,13 +260,14 @@ def get_file_name(module: str, name: str, extension: bool = True) -> str:
     return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
 
 
-@app.command(name="make:modules", help="Compoment generatsiya qilish")
-def generate_modules():
+@app.command(name="make:module", help="Compoment generatsiya qilish")
+def generate_module():
+    generate.selected_modules = None
     generate.auto_generate()
 
 
-@app.command(name="make:all", help="Compoment generatsiya qilish")
-def generate_all():
+@app.command(name="make:crud", help="Compoment generatsiya qilish")
+def generate_crud():
     generate.selected_modules = generate.modules
     generate.auto_generate()
 
