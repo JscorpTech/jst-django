@@ -247,7 +247,6 @@ class Generate:
             self._generate_files(app, modules)
 
 
-generate = Generate()
 
 
 def directory_ls(path: str) -> Generator[Path, None, None]:
@@ -266,12 +265,14 @@ def get_file_name(module: str, name: str, extension: bool = True) -> str:
 
 @app.command(name="make:module", help="Compoment generatsiya qilish")
 def generate_module():
+    generate = Generate()
     generate.selected_modules = None
     generate.auto_generate()
 
 
-@app.command(name="make:crud", help="Compoment generatsiya qilish")
-def generate_crud(fields: str = typer.Option(default="name:str")):
+@app.command(name="make:crud", help="CRUD generatsiya qilish")
+def generate_crud(fields: str = typer.Option(default="name:str", confirmation_prompt=True, help="name:type names[char,int,text,date,time,datetime,image,bool]")):
+    generate = Generate()
     tokenize = Tokenize(fields.strip())
     generate.selected_modules = generate.modules
     generate.fields = tokenize.make()
@@ -280,4 +281,5 @@ def generate_crud(fields: str = typer.Option(default="name:str")):
 
 @app.command(name="make:model", help="generate model")
 def make_model(model_path: str = typer.Argument(..., help="Model path")):
+    generate = Generate()
     generate.make_module(model_path, ["model"])
