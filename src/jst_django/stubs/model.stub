@@ -4,15 +4,18 @@
 ##
 
 class {{ class_name }}(AbstractBaseModel):
-    name = models.CharField(_("name"), max_length=255)
-
+    {% for field in model_fields %}
+    {{ field }}
+    {% endfor %}
     def __str__(self):
-        return self.name
+        return self.pk
 
     @classmethod
     def _create_fake(self):
         return self.objects.create(
-            name="Test",
+            {% for field in fields %}
+            {{ field }}="mock",
+            {% endfor %}
         )
 
     class Meta:

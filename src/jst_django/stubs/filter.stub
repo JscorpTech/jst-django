@@ -3,8 +3,12 @@
 ##
 
 class {{ class_name }}(filters.FilterSet):
-    name = filters.CharFilter(field_name="name", lookup_expr="icontains")
+    # name = filters.CharFilter(field_name="name", lookup_expr="icontains")
 
     class Meta:
         model = {{ name_cap }}Model
-        fields = ("name",)
+        fields = [
+            {% for field in fields %}
+            "{{ field }}",
+            {% endfor %}
+        ]

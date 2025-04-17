@@ -5,9 +5,11 @@
 class Base{{ class_name }}(serializers.ModelSerializer):
     class Meta:
         model = {{ name_cap }}Model
-        exclude = [
-            "created_at",
-            "updated_at",
+        fields = [
+            "id",
+            {% for field in fields %}
+            "{{ field }}",
+            {% endfor %}
         ]
 
 
@@ -20,4 +22,10 @@ class Retrieve{{ class_name }}(Base{{ class_name }}):
 
 
 class Create{{ class_name }}(Base{{ class_name }}):
-    class Meta(Base{{ class_name }}.Meta): ...
+    class Meta(Base{{ class_name }}.Meta):
+        fields = [
+            "id",
+            {% for field in fields %}
+            "{{ field }}",
+            {% endfor %}
+        ]

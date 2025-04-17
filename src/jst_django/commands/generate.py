@@ -7,6 +7,7 @@ from os.path import join
 from jst_django.cli.app import app
 import typer
 import jinja2
+from jst_django.utils.tokenize import Tokenize
 
 MODULES = List[
     Literal[
@@ -36,6 +37,7 @@ class Generate:
         self.selected_modules: Optional[list] = None
         self.app = None
         self.module = None
+        self.fields: Tokenize
 
         self.config = Jst().load_config()
         dirs = self.config.get("dirs", {})
@@ -161,6 +163,8 @@ class Generate:
                         "name": self.name,
                         "name_cap": self.name.capitalize(),
                         "file_name": self.file_name,
+                        "model_fields": self.fields.model,
+                        "fields": self.fields.keys,
                         **import_path,
                     }
                 )
@@ -267,8 +271,10 @@ def generate_module():
 
 
 @app.command(name="make:crud", help="Compoment generatsiya qilish")
-def generate_crud():
+def generate_crud(fields: str = typer.Option(default="name:str")):
+    tokenize = Tokenize(fields.strip())
     generate.selected_modules = generate.modules
+    generate.fields = tokenize.make()
     generate.auto_generate()
 
 
