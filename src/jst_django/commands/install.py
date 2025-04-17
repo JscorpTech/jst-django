@@ -99,7 +99,7 @@ class Module:
                     progress.update(task2, description="[red]Installing error: %s" % str(e))
 
 
-@app.command(name="install", help="Modul o'rnatish")
+@app.command(name="make:app", help="Modul o'rnatish")
 def install_module(
     module_name: Annotated[str, typer.Argument()] = None, version: str = typer.Option(None, "--version", "-v")
 ):

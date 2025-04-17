@@ -1,7 +1,7 @@
-!!from ..models import %(name_cap)sModel
+!!from {{ model_import_path }} import {{ name_cap }}Model
 ##from django.db.models.signals import post_save
 ##from django.dispatch import receiver
 ##
 
-@receiver(post_save, sender=%(name_cap)sModel)
-def %(class_name)s(sender, instance, created, **kwargs): ...
+@receiver(post_save, sender={{ name_cap }}Model)
+def {{ class_name }}(sender, instance, created, **kwargs): ...

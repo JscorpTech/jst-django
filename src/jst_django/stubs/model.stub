@@ -3,19 +3,22 @@
 ##from django.utils.translation import gettext_lazy as _
 ##
 
-class %(class_name)s(AbstractBaseModel):
-    name = models.CharField(_("name"), max_length=255)
-
+class {{ class_name }}(AbstractBaseModel):
+    {% for field in model_fields %}
+    {{ field }}
+    {% endfor %}
     def __str__(self):
-        return self.name
+        return self.pk
 
     @classmethod
     def _create_fake(self):
         return self.objects.create(
-            name="Test",
+            {% for field in fields %}
+            {{ field }}="mock",
+            {% endfor %}
         )
 
     class Meta:
-        db_table = "%(name)s"
-        verbose_name = _("%(class_name)s")
-        verbose_name_plural = _("%(class_name)ss")
+        db_table = "{{ name }}"
+        verbose_name = _("{{ class_name }}")
+        verbose_name_plural = _("{{ class_name }}s")

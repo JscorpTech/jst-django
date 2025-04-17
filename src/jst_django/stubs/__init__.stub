@@ -1,2 +1,2 @@
 
-from .%(file_name)s import * # noqa
+from .{{ file_name }} import * # noqa

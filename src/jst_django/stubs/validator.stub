@@ -1,7 +1,7 @@
 ###from django.core.exceptions import ValidationError
 ##
 
-class %(class_name)s:
+class {{ class_name }}:
     def __init__(self):
         ...
 
