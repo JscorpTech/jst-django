@@ -1,4 +1,4 @@
-from typing import List, Optional, Generator, Dict, Any, LiteralString
+from typing import List, Optional, Generator, Dict, Any, LiteralString, Literal
 import os
 import questionary
 from jst_django.utils import File, Code, Jst, cancel
@@ -7,16 +7,33 @@ from os.path import join
 from jst_django.cli.app import app
 import typer
 
+MODULES = List[
+    Literal[
+        "model",
+        "serializer",
+        "view",
+        "permission",
+        "admin",
+        "test",
+        "translation",
+        "validator",
+        "form",
+        "filter",
+        "signal",
+    ]
+]
+
 
 class Generate:
-    name: Optional[str] = None
-    file_name: Optional[str] = None
     modules: List[str]
     stubs: Dict[str, str]
-    sub_folder: Optional[str] = None
-    selected_modules: Optional[list] = None
 
     def __init__(self) -> None:
+        self.name: Optional[str] = None
+        self.file_name: Optional[str] = None
+        self.sub_folder: Optional[str] = None
+        self.selected_modules: Optional[list] = None
+
         self.config = Jst().load_config()
         dirs = self.config.get("dirs", {})
         self.path = {
@@ -135,7 +152,7 @@ class Generate:
             file.write(self._read_stub("init")[1] % {"file_name": file_name})
         Code.format_code(init_path)
 
-    def _generate_files(self, app: str, modules: List[str]) -> bool:
+    def _generate_files(self, app: str, modules: MODULES) -> bool:
         """Create necessary folders if not found"""
         apps_dir = join(self.path["apps"], app)
         for module in modules:
@@ -143,7 +160,6 @@ class Generate:
             Path(module_dir).mkdir(parents=True, exist_ok=True)
             file_path = join(module_dir, get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
-            File.mkdir(module_dir)
             if module == "serializer":
                 module_dir = join(module_dir, self.file_name)
                 file_path = join(module_dir, f"{self.name}.py")
@@ -157,7 +173,7 @@ class Generate:
             Code.format_code(file_path)
         return True
 
-    def generate(module_path, modules):
+    def make_module(self, module_path: str, modules: MODULES) -> None:
         parts = module_path.split("/")
         if not len(parts) >= 3:
             raise Exception("Model manzili to'g'ri kiritilmadi example: app_name.file_name.model_name")
@@ -173,7 +189,7 @@ class Generate:
         generate.name = model_name
         generate._generate_files(app_name, modules)
 
-    def run(self) -> None:
+    def auto_generate(self) -> None:
         """Run the generator"""
         self.file_name = questionary.text("File Name: ", validate=lambda x: True if len(x) > 0 else False).ask()
         if self.file_name is None:
@@ -192,7 +208,7 @@ class Generate:
         if app is None:
             return cancel()
         if self.selected_modules is None:
-            modules = questionary.checkbox("Select required modules", self.modules).ask()
+            modules = questionary.checkbox("Select required modules", choices=self.modules).ask()
         else:
             modules = self.selected_modules
         if modules is None:
@@ -202,6 +218,9 @@ class Generate:
                 continue
             self.name = name
             self._generate_files(app, modules)
+
+
+generate = Generate()
 
 
 def directory_ls(path: str) -> Generator[Path, None, None]:
@@ -219,22 +238,16 @@ def get_file_name(module: str, name: str, extension: bool = True) -> str:
 
 
 @app.command(name="make:modules", help="Compoment generatsiya qilish")
-def generate():
-    Generate().run()
+def generate_modules():
+    generate.auto_generate()
 
 
 @app.command(name="make:all", help="Compoment generatsiya qilish")
 def generate_all():
-    generate = Generate()
     generate.selected_modules = generate.modules
-    generate.run()
+    generate.auto_generate()
 
 
 @app.command(name="make:model", help="generate model")
 def make_model(model_path: str = typer.Argument(..., help="Model path")):
-    Generate().generate(model_path, ["model"])
-
-
-@app.command(name="make:serializer", help="generate model")
-def make_serializer(model_path: str = typer.Argument(..., help="Model path")):
-    Generate().generate(model_path, ["serializer"])
+    generate.make_module(model_path, ["model"])
