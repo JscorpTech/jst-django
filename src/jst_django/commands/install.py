@@ -22,7 +22,7 @@ def subfolder_to_parent(path):
     os.rmdir(extracted_file)
 
 
-def download(url, dir) -> Union[str]:
+def download(url, dir) -> str:
     """modulni yuklash"""
     file = os.path.join(dir, "%s.zip" % uuid4())
     with requests.get(url, stream=True) as response:

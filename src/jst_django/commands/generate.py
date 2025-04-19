@@ -25,7 +25,9 @@ MODULES = List[
     ]
 ]
 
-FIELDS = typer.Option(default="name:str", confirmation_prompt=True, help="name:type names[char,int,text,date,time,datetime,image,bool]")
+FIELDS = typer.Option(
+    default="name:str", confirmation_prompt=True, help="name:type names[char,int,text,date,time,datetime,image,bool]"
+)
 
 
 class Generate:
@@ -33,13 +35,13 @@ class Generate:
     stubs: Dict[str, str]
 
     def __init__(self) -> None:
-        self.name: Optional[str] = None
-        self.file_name: Optional[str] = None
+        self.name: str = ""
+        self.file_name: str = ""
         self.sub_folder: Optional[str] = None
         self.selected_modules: Optional[list] = None
         self.app = None
         self.module = None
-        self.fields: Optional[Tokenize] = None
+        self.fields: Tokenize
 
         self.config = Jst().load_config()
         dirs = self.config.get("dirs", {})
@@ -193,7 +195,7 @@ class Generate:
                 File.mkdir(module_dir)
                 self._import_init(join(module_dir, "__init__.py"), file_name=self.name)
             if not os.path.exists(file_path):
-                self._import_init(init_path, get_file_name(module, self.file_name, extension=False))
+                self._import_init(init_path, get_file_name(module, self.file_name, _extension=False))
                 self._write_file(file_path, module, module.capitalize())
             else:
                 self._write_file(file_path, module, module.capitalize(), append=True)
@@ -249,8 +251,6 @@ class Generate:
             self._generate_files(app, modules)
 
 
-
-
 def directory_ls(path: str) -> Generator[Path, None, None]:
     """Directory items list"""
     ignore = ["logs"]
@@ -259,14 +259,14 @@ def directory_ls(path: str) -> Generator[Path, None, None]:
             yield item
 
 
-def get_file_name(module: str, name: str, extension: bool = True) -> str:
+def get_file_name(module: str, name: str, _extension: bool = True) -> str:
     """Get file name"""
-    extension = ".py" if extension else ""
+    extension = ".py" if _extension else ""
     return f"test_{name}{extension}" if module == "test" else f"{name}{extension}"
 
 
 @app.command(name="make:module", help="Compoment generatsiya qilish")
-def generate_module(fields:str = FIELDS):
+def generate_module(fields: str = FIELDS):
     generate = Generate()
     tokenize = Tokenize(fields.strip())
     generate.selected_modules = None
