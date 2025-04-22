@@ -17,6 +17,7 @@ class Jst:
             "stubs": {
                 "admin": "django/admin.stub",
             },
+            "import_path": "core.apps."
         }
 
     def _check_config(self) -> Union[bool]:

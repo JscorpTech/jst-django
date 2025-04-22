@@ -60,6 +60,7 @@ class Generate:
             "signal": dirs.get("signals", "signals/"),
             "stubs": join(os.path.dirname(__file__), "../stubs"),
         }
+
         self.modules = [
             "model",
             "serializer",
@@ -133,9 +134,10 @@ class Generate:
 
     def _get_import_path(self, path: str, sub: bool = False) -> str:
         import_sub_path = "." + self.sub_folder.replace("/", ".") if self.sub_folder is not None else ""
+        import_path = self.config.get("import_path", "core.apps.")
         if sub is True:
             import_sub_path += f".{self.file_name}"
-        return f"core.apps.{self.app}.{path}{import_sub_path}"
+        return f"{import_path}{self.app}.{path}{import_sub_path}"
 
     def _write_file(
         self,
