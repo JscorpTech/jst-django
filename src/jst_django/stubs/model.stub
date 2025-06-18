@@ -8,7 +8,7 @@ class {{ class_name }}(AbstractBaseModel):
     {{ field }}
     {% endfor %}
     def __str__(self):
-        return self.pk
+        return str(self.pk)
 
     @classmethod
     def _create_fake(self):
