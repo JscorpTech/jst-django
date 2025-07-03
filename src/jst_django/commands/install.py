@@ -37,6 +37,7 @@ class Module:
     modules = {
         "default": "https://github.com/JscorpTech/module-default.git",
         "authbot": "https://github.com/JscorpTech/module-authbot.git",
+        "authv2": "https://github.com/JscorpTech/module-authv2.git",
         "websocket": "https://github.com/JscorpTech/module-websocket.git",
     }
 
