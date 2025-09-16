@@ -1,16 +1,17 @@
-import zipfile
-import tempfile
-import requests
 import os
-from jst_django.utils.api import Github
-import questionary
 import shutil
+import tempfile
+import zipfile
+from typing import Annotated, Union
 from uuid import uuid4
-from typing import Union
-from jst_django.utils import Jst, get_progress, cancel
+
+import questionary
+import requests
 import typer
-from typing import Annotated
+
 from jst_django.cli.app import app
+from jst_django.utils import Jst, cancel, get_progress
+from jst_django.utils.api import Github
 
 
 def subfolder_to_parent(path):
@@ -36,6 +37,7 @@ def download(url, dir) -> str:
 class Module:
     modules = {
         "default": "https://github.com/JscorpTech/module-default.git",
+        "bot": "https://github.com/JscorpTech/module-bot.git",
         "authbot": "https://github.com/JscorpTech/module-authbot.git",
         "authv2": "https://github.com/JscorpTech/module-authv2.git",
         "websocket": "https://github.com/JscorpTech/module-websocket.git",
