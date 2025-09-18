@@ -1,6 +1,7 @@
-import isort
-from typing import Union
+from typing import Optional
+
 import black
+import isort
 from rich import print
 
 
@@ -9,7 +10,7 @@ class Code:
         pass
 
     @staticmethod
-    def format_code(file_path: Union[str]) -> None:
+    def format_code(file_path: str) -> None:
         """Black and Isort format code"""
         try:
             with open(file_path, "r") as file:
@@ -21,3 +22,14 @@ class Code:
                 file.write(code)
         except Exception as e:
             print("[bold red]%s[/bold red]" % str(e))
+
+
+def format_code_string(source: str) -> Optional[str]:
+    """Black and Isort format code from string"""
+    try:
+        return black.format_str(
+            isort.code(source, config=isort.Config(profile="black", line_length=120)),
+            mode=black.FileMode(line_length=120),
+        )
+    except Exception as e:
+        print("[bold red]%s[/bold red]" % str(e))

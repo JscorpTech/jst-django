@@ -1,12 +1,16 @@
-from typing import List, Optional, Generator, Dict, Any, LiteralString, Literal
 import os
-import questionary
-from jst_django.utils import File, Code, Jst, cancel
-from pathlib import Path
 from os.path import join
-from jst_django.cli.app import app
-import typer
+from pathlib import Path
+from typing import Any, Dict, Generator, List, Literal, LiteralString, Optional
+
 import jinja2
+import questionary
+import typer
+
+from jst_django.cli.app import app
+from jst_django.utils import Code, File, Jst, cancel
+from jst_django.utils.ast_utils import add_router_registration_with_import
+from jst_django.utils.code import format_code_string
 from jst_django.utils.tokenize import Tokenize
 
 MODULES = List[
@@ -88,6 +92,9 @@ class Generate:
             "filter": "filter.stub",
             "signal": "signal.stub",
         } | self.config.get("stubs", {})
+
+    def _upper(self, text: str) -> str:
+        return text[0].upper() + text[1:]
 
     def _get_apps(self) -> Generator[str, None, None]:
         """Return list of Django apps"""
@@ -251,6 +258,13 @@ class Generate:
                 continue
             self.name = name
             self._generate_files(app, modules)
+            with open(self.path.get("apps") + app + "/urls.py", "r+") as file:
+                result = add_router_registration_with_import(file.read(), self._upper(name) + "View", name)
+                file.seek(0)
+                file.truncate()
+                code = format_code_string(result)
+                if code is not None:
+                    file.write(code)
 
 
 def directory_ls(path: str) -> Generator[Path, None, None]:

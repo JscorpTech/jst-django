@@ -12,6 +12,8 @@ import typer
 from jst_django.cli.app import app
 from jst_django.utils import Jst, cancel, get_progress
 from jst_django.utils.api import Github
+from jst_django.utils.ast_utils import add_include_urlpattern, add_module
+from jst_django.utils.code import format_code_string
 
 
 def subfolder_to_parent(path):
@@ -72,10 +74,11 @@ class Module:
                 file.write(data.replace("{{module_name}}", "%s%s" % (self.config.get("apps", ""), module_name)))
                 file.truncate()
 
-    def run(self, module_name: str, version=None):
+    def run(self, module_name: str, version=None) -> bool:
         module = questionary.select("Modulni tanlang", choices=self.modules.keys()).ask()
         if module is None:
-            return cancel()
+            cancel()
+            return False
         with get_progress() as progress:
             task1 = progress.add_task("[cyan]Fetch module")
             task2 = progress.add_task("[magenta]Install module")
@@ -100,10 +103,25 @@ class Module:
                     progress.update(task2, description="[green]I√ Done Installed module: %s" % module_name)
                 except Exception as e:
                     progress.update(task2, description="[red]Installing error: %s" % str(e))
+                    return False
+            return True
 
 
 @app.command(name="make:app", help="Modul o'rnatish")
 def install_module(
     module_name: Annotated[str, typer.Argument()] = None, version: str = typer.Option(None, "--version", "-v")
 ):
-    Module().run(module_name, version)
+    result = Module().run(module_name, version)
+    if result:
+        with open("config/conf/modules.py", "r+") as file:
+            code = format_code_string(add_module(file.read(), "core.apps.%s" % module_name))
+            if code is not None:
+                file.seek(0)
+                file.truncate()
+                file.write(code)
+        with open("config/urls.py", "r+") as file:
+            code = format_code_string(add_include_urlpattern(file.read(), "api/", "core.apps.%s.urls" % module_name))
+            if code is not None:
+                file.seek(0)
+                file.truncate()
+                file.write(code)
