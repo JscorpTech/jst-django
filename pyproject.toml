@@ -50,6 +50,7 @@ polib = "^1.2.0"
 tqdm = "^4.67.0"
 jst-aicommit = "^1.2"
 isort = "^5.13.2"
+astor = "^0.8.1"
 
 [tool.poetry.scripts]
 jst = 'jst_django.cli.main:app'
