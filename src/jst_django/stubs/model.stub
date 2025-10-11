@@ -11,8 +11,8 @@ class {{ class_name }}(AbstractBaseModel):
         return str(self.pk)
 
     @classmethod
-    def _create_fake(self):
-        return self.objects.create(
+    def _create_fake(cls):
+        return cls.objects.create(
             {% for field in fields %}
             {{ field }}="mock",
             {% endfor %}
