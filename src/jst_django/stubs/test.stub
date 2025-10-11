@@ -11,6 +11,7 @@ def api_client():
     return client
 
 
+@pytest.mark.django_db
 @pytest.fixture
 def instance():
     return {{ name_cap }}Model._create_fake()
