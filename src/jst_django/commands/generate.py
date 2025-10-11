@@ -198,13 +198,16 @@ class Generate:
             Path(module_dir).mkdir(parents=True, exist_ok=True)
             file_path = join(module_dir, get_file_name(module, self.file_name))
             init_path = join(module_dir, "__init__.py")
-            if module == "serializer":
+            if module in ["serializer", "test"]:
                 module_dir = join(module_dir, self.file_name)
-                file_path = join(module_dir, f"{self.name}.py")
+                file_path = join(module_dir, get_file_name(module, self.name))
                 File.mkdir(module_dir)
-                self._import_init(join(module_dir, "__init__.py"), file_name=self.name)
+                self._import_init(
+                    join(module_dir, "__init__.py"),
+                    file_name=get_file_name(module, self.name, _extension=False),
+                )
             if not os.path.exists(file_path):
-                self._import_init(init_path, get_file_name(module, self.file_name, _extension=False))
+                self._import_init(init_path, self.file_name)
                 self._write_file(file_path, module, module.capitalize())
             else:
                 self._write_file(file_path, module, module.capitalize(), append=True)
