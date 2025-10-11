@@ -1,46 +1,62 @@
-!!from {{ model_import_path }} import {{ name_cap }}Model
-##from django.test import TestCase
-##from django.urls import reverse
-##from rest_framework.test import APIClient
+import pytest
+from django.urls import reverse
+from rest_framework.test import APIClient
+from {{ model_import_path }} import {{ name_cap }}Model
 
 
-class {{ class_name }}(TestCase):
+@pytest.fixture
+def api_client():
+    client = APIClient()
+    # client.force_authenticate(user=None)
+    return client
 
-    def _create_data(self):
-        return {{ name_cap }}Model._create_fake()
 
-    def setUp(self):
-        self.client = APIClient()
-        self.instance = self._create_data()
-        self.urls = {
-            "list": reverse("{{ name }}-list"),
-            "retrieve": reverse("{{ name }}-detail", kwargs={"pk": self.instance.pk}),
-            "retrieve-not-found": reverse("{{ name }}-detail", kwargs={"pk": 1000}),
-        }
+@pytest.fixture
+def instance():
+    return {{ name_cap }}Model._create_fake()
 
-    def test_create(self):
-        self.assertTrue(True)
 
-    def test_update(self):
-        self.assertTrue(True)
+@pytest.fixture
+def urls(instance):
+    return {
+        "list": reverse("{{ name }}-list"),
+        "retrieve": reverse("{{ name }}-detail", kwargs={"pk": instance.pk}),
+        "retrieve-not-found": reverse("{{ name }}-detail", kwargs={"pk": 1000}),
+    }
 
-    def test_partial_update(self):
-        self.assertTrue(True)
 
-    def test_destroy(self):
-        self.assertTrue(True)
+def test_create():
+    assert True
 
-    def test_list(self):
-        response = self.client.get(self.urls["list"])
-        self.assertTrue(response.json()["status"])
-        self.assertEqual(response.status_code, 200)
 
-    def test_retrieve(self):
-        response = self.client.get(self.urls["retrieve"])
-        self.assertTrue(response.json()["status"])
-        self.assertEqual(response.status_code, 200)
-    
-    def test_retrieve_not_found(self):
-        response = self.client.get(self.urls["retrieve-not-found"])
-        self.assertFalse(response.json()["status"])
-        self.assertEqual(response.status_code, 404)
+def test_update():
+    assert True
+
+
+def test_partial_update():
+    assert True
+
+
+def test_destroy():
+    assert True
+
+
+def test_list(api_client, urls):
+    response = api_client.get(urls["list"])
+    data = response.json()
+    assert response.status_code == 200
+    assert data["status"] is True
+
+
+def test_retrieve(api_client, urls):
+    response = api_client.get(urls["retrieve"])
+    data = response.json()
+    assert response.status_code == 200
+    assert data["status"] is True
+
+
+def test_retrieve_not_found(api_client, urls):
+    response = api_client.get(urls["retrieve-not-found"])
+    data = response.json()
+    assert response.status_code == 404
+    assert data["status"] is False
