@@ -1,6 +1,7 @@
 ##from django.db import models
 ##from django_core.models import AbstractBaseModel
 ##from django.utils.translation import gettext_lazy as _
+##from model_bakery import baker
 ##
 
 class {{ class_name }}(AbstractBaseModel):
@@ -11,12 +12,8 @@ class {{ class_name }}(AbstractBaseModel):
         return str(self.pk)
 
     @classmethod
-    def _create_fake(cls):
-        return cls.objects.create(
-            {% for field in fields %}
-            {{ field }}="mock",
-            {% endfor %}
-        )
+    def _baker(cls):
+        return baker.make(cls)
 
     class Meta:
         db_table = "{{ name }}"
