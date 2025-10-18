@@ -1,3 +1,4 @@
+import re
 import typer
 import os
 from rich import print
@@ -35,7 +36,11 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         "parler",
     ]
     questions = {
-        "project_name": {"type": "text", "message": "Project name: ", "default": "django"},
+        "project_name": {
+            "type": "text",
+            "message": "Project name:",
+            "validate": lambda x: bool(re.match(r"^(?=.*[A-Za-z])[A-Za-z0-9]+$", x)),
+        },
         "settings_module": {
             "type": "select",
             "message": "Settings file",
