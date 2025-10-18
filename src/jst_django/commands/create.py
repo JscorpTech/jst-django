@@ -20,20 +20,16 @@ def create_project(version: str = typer.Option(None, "--version", "-v")):
         else:
             Github().releases(version)
         progress.update(task1, description="[green]√ Done: Fetch version")
-    template = questionary.text("Template: ", default="django").ask()
-    if template is None:
-        return cancel()
-    if template == "django" or (template.startswith("http") is not True and not os.path.exists(template)):
-        template = "https://github.com/JscorpTech/{}".format(template)
+    template = "https://github.com/JscorpTech/django"
     choices = [
         "cacheops",
         "silk",
         "storage",
-        "rosetta",
         "channels",
         "ckeditor",
         "modeltranslation",
         "parler",
+        "rosetta",
     ]
     questions = {
         "project_name": {
