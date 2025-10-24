@@ -1,5 +1,5 @@
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich import print
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 
 def get_progress():

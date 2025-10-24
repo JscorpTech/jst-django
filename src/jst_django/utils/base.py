@@ -1,15 +1,26 @@
-import os
-from rich import print
+"""Base utility classes and functions for jst-django."""
+
 import json
-from typing import Union
+import os
+import sys
 from pathlib import Path
+from typing import Optional, Union
+
+from rich import print
+
+from jst_django.config import ConfigManager
+from jst_django.exceptions import ConfigurationError
+from jst_django.utils.logger import logger
 
 
 class Jst:
+    """Main jst utility class for configuration management."""
 
     def __init__(self):
-        self.base_dir = os.getcwd()
-        self.config = {
+        """Initialize Jst utility."""
+        self.base_dir = Path.cwd()
+        self.config_manager = ConfigManager()
+        self.default_config = {
             "dirs": {
                 "apps": "./",
                 "locale": "./locale/",
@@ -17,31 +28,148 @@ class Jst:
             "stubs": {
                 "admin": "django/admin.stub",
             },
-            "import_path": "core.apps."
+            "import_path": "core.apps.",
         }
 
-    def _check_config(self) -> Union[bool]:
-        """Config fayil mavjudligini tekshirish"""
-        return os.path.exists(os.path.join(os.getcwd(), "jst.json"))
+    def _check_config(self) -> bool:
+        """
+        Check if config file exists.
 
-    def make_config(self):
-        """Config fayil yaratish"""
-        if self._check_config():
-            print("[bold red]config fayli mavjud.[/bold red]")
-            exit()
-        with open("jst.json", "w") as file:
-            json.dump(self.config, file, indent=4)
-        print("[bold green]config yaratildi.[/bold green]")
+        Returns:
+            True if config file exists
+        """
+        return self.config_manager.config_path.exists()
 
-    def load_config(self):
-        """Config fayilni o'qish"""
-        if not self._check_config():
-            print("[bold red]config fayli topilmadi iltimos jst init commandasidan foydalaning.[/bold red]")
-            exit()
-        with open("jst.json", "r") as file:
-            return json.load(file)
+    def make_config(self) -> None:
+        """
+        Create config file.
 
-    def requirements(self):
-        requirements = Path(os.path.dirname(__file__)).parent.joinpath("stubs", "requirements.txt.stub")
-        with open(requirements, "r") as file:
-            print(file.read())
+        Raises:
+            ConfigurationError: If config file already exists
+        """
+        try:
+            if self._check_config():
+                logger.error("Config file already exists")
+                raise ConfigurationError("Config file already exists")
+
+            self.config_manager.save(self.default_config)
+            logger.info("Config file created successfully")
+            print("[bold green]Config yaratildi.[/bold green]")
+
+        except Exception as e:
+            logger.exception("Failed to create config file")
+            raise ConfigurationError("Failed to create config file", details=str(e))
+
+    def load_config(self) -> dict:
+        """
+        Load config file.
+
+        Returns:
+            Configuration dictionary
+
+        Raises:
+            ConfigurationError: If config file not found or invalid
+        """
+        try:
+            if not self._check_config():
+                logger.warning("Config file not found, using defaults")
+                return self.default_config
+
+            return self.config_manager.load()
+
+        except Exception as e:
+            logger.exception("Failed to load config file")
+            raise ConfigurationError("Failed to load config file", details=str(e))
+
+    def requirements(self) -> None:
+        """
+        Display requirements file content.
+
+        Raises:
+            FileNotFoundError: If requirements stub file not found
+        """
+        try:
+            requirements_path = Path(__file__).parent.parent / "stubs" / "requirements.txt.stub"
+
+            if not requirements_path.exists():
+                logger.error(f"Requirements file not found: {requirements_path}")
+                raise FileNotFoundError(f"Requirements file not found: {requirements_path}")
+
+            with open(requirements_path, "r", encoding="utf-8") as file:
+                print(file.read())
+
+        except Exception as e:
+            logger.exception("Failed to display requirements")
+            raise
+
+
+class Code:
+    """Code formatting and manipulation utilities."""
+
+    def __init__(self):
+        """Initialize Code utility."""
+        pass
+
+    @staticmethod
+    def format_code(file_path: str) -> None:
+        """
+        Format code using black and isort.
+
+        Args:
+            file_path: Path to file to format
+
+        Raises:
+            FileNotFoundError: If file not found
+        """
+        from jst_django.utils.code import Code as CodeFormatter
+
+        try:
+            CodeFormatter.format_code(file_path)
+        except Exception as e:
+            logger.error(f"Failed to format code: {file_path}")
+            logger.exception(e)
+            raise
+
+
+class File:
+    """File operation utilities."""
+
+    def __init__(self):
+        """Initialize File utility."""
+        pass
+
+    @staticmethod
+    def mkdir(path: Union[str, Path]) -> None:
+        """
+        Create directory if not exists.
+
+        Args:
+            path: Directory path to create
+        """
+        from jst_django.utils.file import File as FileUtil
+
+        FileUtil.mkdir(path)
+
+
+def cancel(message: str = "Operation cancelled") -> None:
+    """
+    Cancel operation and exit.
+
+    Args:
+        message: Message to display before exit
+    """
+    logger.warning(message)
+    print(f"[bold yellow]{message}[/bold yellow]")
+    sys.exit(0)
+
+
+def get_progress():
+    """
+    Get progress context manager.
+
+    Returns:
+        Progress context manager
+    """
+    from jst_django.utils.progress import get_progress as get_prog
+
+    return get_prog()

@@ -2,18 +2,13 @@ import os
 import shutil
 import tempfile
 import zipfile
-from typing import Annotated, Union
 from uuid import uuid4
 
 import questionary
 import requests
-import typer
 
-from jst_django.cli.app import app
 from jst_django.utils import Jst, cancel, get_progress
 from jst_django.utils.api import Github
-from jst_django.utils.ast_utils import add_include_urlpattern, add_module
-from jst_django.utils.code import format_code_string
 
 
 def subfolder_to_parent(path):
@@ -105,23 +100,3 @@ class Module:
                     progress.update(task2, description="[red]Installing error: %s" % str(e))
                     return False
             return True
-
-
-@app.command(name="make:app", help="Modul o'rnatish")
-def install_module(
-    module_name: Annotated[str, typer.Argument()] = None, version: str = typer.Option(None, "--version", "-v")
-):
-    result = Module().run(module_name, version)
-    if result:
-        with open("config/conf/modules.py", "r+") as file:
-            code = format_code_string(add_module(file.read(), "core.apps.%s" % module_name))
-            if code is not None:
-                file.seek(0)
-                file.truncate()
-                file.write(code)
-        with open("config/urls.py", "r+") as file:
-            code = format_code_string(add_include_urlpattern(file.read(), "api/", "core.apps.%s.urls" % module_name))
-            if code is not None:
-                file.seek(0)
-                file.truncate()
-                file.write(code)

@@ -1,14 +1,16 @@
-from typing import Union, List, Tuple, Any
-import requests
-from jst_django.utils.logger import logging
-from polib import pofile
-from tqdm import tqdm
-import questionary
 import os
-from jst_django.utils import Jst, cancel
-from rich.console import Console
 import time
+from typing import Any, List, Tuple, Union
+
+import questionary
+import requests
+from polib import pofile
+from rich.console import Console
+from tqdm import tqdm
+
 from jst_django.cli.app import app
+from jst_django.utils import Jst, cancel
+from jst_django.utils.logger import logging
 
 console = Console()
 

@@ -1,4 +1,5 @@
 from jst_aicommit.main import JstAiCommit
+
 from jst_django.cli.app import app
 
 

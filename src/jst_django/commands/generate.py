@@ -1,15 +1,16 @@
 import os
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Literal, LiteralString, Optional
+from typing import Annotated, Any, Dict, Generator, List, Literal, LiteralString, Optional
 
 import jinja2
 import questionary
 import typer
 
 from jst_django.cli.app import app
+from jst_django.commands.install import Module
 from jst_django.utils import Code, File, Jst, cancel
-from jst_django.utils.ast_utils import add_router_registration_with_import
+from jst_django.utils.ast_utils import add_include_urlpattern, add_module, add_router_registration_with_import
 from jst_django.utils.code import format_code_string
 from jst_django.utils.tokenize import Tokenize
 
@@ -231,11 +232,9 @@ class Generate:
         generate.name = model_name
         generate._generate_files(app_name, modules)
 
-    def auto_generate(self) -> None:
+    def auto_generate(self, file_name: str) -> None:
         """Run the generator"""
-        self.file_name = questionary.text("File Name: ", validate=lambda x: True if len(x) > 0 else False).ask()
-        if self.file_name is None:
-            return cancel()
+        self.file_name = file_name
         filename_parts = self.file_name.split("/")
         if len(filename_parts) > 1:
             self.file_name = filename_parts[-1]
@@ -285,21 +284,42 @@ def get_file_name(module: str, name: str, _extension: bool = True) -> str:
 
 
 @app.command(name="make:module", help="Compoment generatsiya qilish")
-def generate_module(fields: str = FIELDS):
+def generate_module(module_name: Annotated[str, typer.Argument()], fields: str = FIELDS):
     generate = Generate()
     tokenize = Tokenize(fields.strip())
     generate.selected_modules = None
     generate.fields = tokenize.make()
-    generate.auto_generate()
+    generate.auto_generate(module_name)
+
+
+@app.command(name="make:app", help="Modul o'rnatish")
+def generate_app(module_name: Annotated[str, typer.Argument()], version: str = typer.Option(None, "--version", "-v")):
+    if module_name is None:
+        raise Exception("Module name is required")
+
+    result = Module().run(module_name, version)
+    if result:
+        with open("config/conf/modules.py", "r+") as file:
+            code = format_code_string(add_module(file.read(), "core.apps.%s" % module_name))
+            if code is not None:
+                file.seek(0)
+                file.truncate()
+                file.write(code)
+        with open("config/urls.py", "r+") as file:
+            code = format_code_string(add_include_urlpattern(file.read(), "api/", "core.apps.%s.urls" % module_name))
+            if code is not None:
+                file.seek(0)
+                file.truncate()
+                file.write(code)
 
 
 @app.command(name="make:crud", help="CRUD generatsiya qilish")
-def generate_crud(fields: str = FIELDS):
+def generate_crud(module_name: Annotated[str, typer.Argument()], fields: str = FIELDS):
     generate = Generate()
     tokenize = Tokenize(fields.strip())
     generate.selected_modules = generate.modules
     generate.fields = tokenize.make()
-    generate.auto_generate()
+    generate.auto_generate(module_name)
 
 
 @app.command(name="make:model", help="generate model")
