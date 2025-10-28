@@ -57,6 +57,9 @@ pytest = "^8.4.2"
 [tool.poetry.scripts]
 jst = 'jst_django.cli.main:app'
 
+[tool.poetry.group.dev.dependencies]
+pytest-cov = "^7.0.0"
+
 [tool.black]
 line-length = 120
 
