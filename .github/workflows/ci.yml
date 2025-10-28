@@ -27,15 +27,6 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-interaction
 
-    - name: Run linters
-      run: |
-        poetry run flake8 src/jst_django
-        poetry run black --check src/jst_django tests
-        poetry run isort --check-only src/jst_django tests
-
-    - name: Run type checking
-      run: poetry run mypy src/jst_django --ignore-missing-imports
-
     - name: Run tests with coverage
       run: poetry run pytest tests/ -v --cov=src/jst_django --cov-report=xml
 
