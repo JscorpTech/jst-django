@@ -28,13 +28,7 @@ jobs:
       run: poetry install --no-interaction
 
     - name: Run tests with coverage
-      run: poetry run pytest tests/ -v --cov=src/jst_django --cov-report=xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
+      run: poetry run pytest tests/ -v
 
   build:
     runs-on: ubuntu-latest
