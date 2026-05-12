@@ -14,7 +14,6 @@ jst-django/
 │   │   ├── generate.py     # Module generation
 │   │   ├── install.py      # Module installation
 │   │   ├── translate.py    # Translation management
-│   │   ├── aic.py          # AI commit messages
 │   │   ├── requirements.py # Dependencies management
 │   │   └── init.py         # Initialization
 │   │
