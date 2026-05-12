@@ -1,6 +1,6 @@
 """JST-Django: Django project generator and utilities."""
 
-__version__ = "v5.0.4"
+__version__ = "v5.0.5"
 __author__ = "A'zamov Samandar"
 __email__ = "JscorpTech@gmail.com"
 
