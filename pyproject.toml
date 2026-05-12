@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jst-django"
-version = "v5.0.4"
+version = "v5.0.5"
 description = ""
 authors = ["A'zamov Samandar <JscorpTech@gmail.com>"]
 readme = "README.md"
